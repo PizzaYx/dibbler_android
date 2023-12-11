@@ -34,14 +34,16 @@ class HomeController extends GetxController {
   void onInit() {
     updateTime();
 
-    final VideoController vct = Get.put(VideoController());
-    vct.setAutoPlayUrlTitle();
-    //延迟5s isPlayState改为true
+
     Future.delayed(const Duration(seconds: 10), () {
-      getDeviceId();
+      //判断到5s时就调用
+
+
       //初始获取一次 随机播放的视频
       final VideoController vct = Get.put(VideoController());
       vct.setAutoPlayUrlTitle();
+      getDeviceId();
+
       //测试10S后显示视频
       isPlayState.value = true;
     });

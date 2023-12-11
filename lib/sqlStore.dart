@@ -1,37 +1,61 @@
 //Sql
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class SqlStore extends GetxController {
   static SqlStore get to => Get.find();
 
-  late final Database db;
+  late Database db;
 
   @override
   Future<void> onInit() async {
-    // 初始化方法，在控制器初始化时调用
-    //判断数据库存在不 不存在就openData
-    openData();
+    openDatabaseConnection();
     super.onInit();
   }
 
-
-
   /// 打开数据库
-  Future<void> openData() async {
-    db = await openDatabase(
-      'download.db',
-      version: 1,
-      onCreate: (database, version) async {
-        // 创建download表 movieId 电影ID,url电影链接,cover电影封面,title电影标题,status 本地下载状态,
-        // localPath 本地下载路径,synchro与服务器同步下载状态
-        await database.execute(
-          'CREATE TABLE download (id INTEGER PRIMARY KEY,movieId TEXT ,url TEXT,'
-          ' cover TEXT, title TEXT, status TEXT,localPath TEXT,synchro INTEGER)',
-        );
-      },
-    );
-    print('数据库打开成功');
+  Future<void> openDatabaseConnection() async {
+    String databasePath = await getDatabasesPath();
+    String databaseName = 'download.db';
+    String path = join(databasePath, databaseName);
+
+    // 检查数据库文件是否存在
+    bool databaseExists = await File(path).exists();
+
+    // 如果数据库文件存在，直接打开
+    if (databaseExists) {
+      db = await openDatabase(path);
+    } else {
+      // 如果数据库不存在，创建数据库
+      db = await openDatabase(
+        path,
+        version: 1,
+        onCreate: (database, version) async {
+          // 创建 download 表
+          await database.execute(
+            'CREATE TABLE download (id INTEGER PRIMARY KEY, movieId TEXT, url TEXT,'
+            ' cover TEXT, title TEXT, status TEXT, localPath TEXT, synchro INTEGER)',
+          );
+        },
+      );
+    }
+
+    // db = await openDatabase(
+    //   'download.db',
+    //   version: 1,
+    //   onCreate: (database, version) async {
+    //     // 创建download表 movieId 电影ID,url电影链接,cover电影封面,title电影标题,status 本地下载状态,
+    //     // localPath 本地下载路径,synchro与服务器同步下载状态
+    //     await database.execute(
+    //       'CREATE TABLE download (id INTEGER PRIMARY KEY,movieId TEXT ,url TEXT,'
+    //       ' cover TEXT, title TEXT, status TEXT,localPath TEXT,synchro INTEGER)',
+    //     );
+    //   },
+    // );
+    //print('数据库打开成功');
   }
 
   /// 插入电影Id编号，电影封面图链接，电影下载链接，电影下载状态
