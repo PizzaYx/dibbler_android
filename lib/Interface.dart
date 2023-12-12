@@ -13,6 +13,7 @@ import 'homeController.dart';
 String baseUrl = "http://192.168.0.148:8090/clientport/";
 final HomeController ct = Get.find<HomeController>();
 
+//设备id
 String thisDeviceId = "";
 //存储sql路径
 String localSQLPath = "";
@@ -59,6 +60,7 @@ Future<void> getDeviceId() async {
     IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
     thisDeviceId = iosInfo.identifierForVendor!;
   }
+
 }
 
 //获取视频列表
@@ -86,7 +88,7 @@ Future<void> getDownloadVideoList() async {
 Future<void> updateVideoIsDownload(String movieId) async {
   try {
     var response = await Dio().get(
-        "${baseUrl}updateVideoIsDownload?id=$movieId?clientId=$thisDeviceId");
+        "${baseUrl}updateVideoIsDownload?id=$movieId&?clientId=$thisDeviceId");
     print(response.data);
     if (response.data['code'] == 200) {
       Get.snackbar('提示', '更新成功');
