@@ -1,9 +1,14 @@
 //Sql
 import 'dart:io';
 
+import 'package:external_path/external_path.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'Interface.dart';
 
 class SqlStore extends GetxController {
   static SqlStore get to => Get.find();
@@ -11,16 +16,19 @@ class SqlStore extends GetxController {
   late Database db;
 
   @override
-  Future<void> onInit() async {
+  void onInit() {
     openDatabaseConnection();
     super.onInit();
   }
 
   /// 打开数据库
   Future<void> openDatabaseConnection() async {
-    String databasePath = await getDatabasesPath();
+
+    String dibblerPath = await getLocalPath();
+
+   // String databasePath = await getDatabasesPath();
     String databaseName = 'download.db';
-    String path = join(databasePath, databaseName);
+    String path = join(dibblerPath, databaseName);
 
     // 检查数据库文件是否存在
     bool databaseExists = await File(path).exists();
@@ -42,20 +50,6 @@ class SqlStore extends GetxController {
         },
       );
     }
-
-    // db = await openDatabase(
-    //   'download.db',
-    //   version: 1,
-    //   onCreate: (database, version) async {
-    //     // 创建download表 movieId 电影ID,url电影链接,cover电影封面,title电影标题,status 本地下载状态,
-    //     // localPath 本地下载路径,synchro与服务器同步下载状态
-    //     await database.execute(
-    //       'CREATE TABLE download (id INTEGER PRIMARY KEY,movieId TEXT ,url TEXT,'
-    //       ' cover TEXT, title TEXT, status TEXT,localPath TEXT,synchro INTEGER)',
-    //     );
-    //   },
-    // );
-    //print('数据库打开成功');
   }
 
   /// 插入电影Id编号，电影封面图链接，电影下载链接，电影下载状态

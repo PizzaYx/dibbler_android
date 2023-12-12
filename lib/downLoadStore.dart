@@ -16,25 +16,28 @@ class DownLoadStore extends GetxController {
 
   void initialize() {
     ALDownloader.initialize();
+
     ALDownloader.configurePrint(true, frequentEnabled: false);
   }
 
   //外部传入数据并下载
   void setMoviesDownload(String url, String status) {
-    if (status != 'unKnown') {
-      addForeverHandlerInterface(url);
-    }
+
     downloadForUrl(url);
   }
 
   //下载
   void downloadForUrl(String url) {
+    String name = url.split('/').last;
     ALDownloader.download(url,
+        fileName: name,
+        directoryPath: localVideoPath,
         handlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint('ALDownloader | 下载进度 = $progress, url = $url\n');
         }, succeededHandler: () {
           debugPrint('ALDownloader | 下载成功, url = $url\n');
+          successAction(url);
         }, failedHandler: () {
           debugPrint('ALDownloader | 下载失败, url = $url\n');
           SqlStore.to.updateDownloadStatus(url, 'failed');
@@ -111,10 +114,4 @@ class DownLoadStore extends GetxController {
         'ALDownloader | 获取[url]的物理文件路径, url = $url, path = $physicalFilePath\n');
     return physicalFilePath;
   }
-
-  // /// Manage [ALDownloaderHandlerInterface] by [ALDownloaderHandlerInterfaceId]
-  // final _handlerInterfaceIds = <ALDownloaderHandlerInterfaceId>[];
-  //
-  // /// Manage batch [ALDownloaderHandlerInterface] by [ALDownloaderHandlerInterfaceId]
-  // final _handlerInterfaceIdsForBatch = <ALDownloaderHandlerInterfaceId>[];
 }

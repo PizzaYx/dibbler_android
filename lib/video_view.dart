@@ -23,7 +23,7 @@ class VideoController extends GetxController {
     initializeVideoPlayer();
   }
 
-  // 如果随机播放获取值
+  // 如果随机播放 获取值
   void setAutoPlayUrlTitle() async {
     List<String> data = await SqlStore.to.queryUrlTitle();
     if (data.isNotEmpty) {

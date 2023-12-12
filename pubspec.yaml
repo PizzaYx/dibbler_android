@@ -53,6 +53,11 @@ dependencies:
   flutter_screenutil: ^5.9.0
   #获取设备信息
   device_info_plus: ^9.1.1
+  web_socket_channel: ^2.4.0
+  #路径
+  external_path: ^1.0.3
+  #权限
+  permission_handler: ^11.1.0
 
 dev_dependencies:
   flutter_test:

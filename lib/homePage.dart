@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'Interface.dart';
 import 'homeController.dart';
 import 'video_view.dart';
 
@@ -15,11 +16,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final HomeController ct = Get.put(HomeController());
-
+  final VideoController vct = Get.find<VideoController>();
   @override
   void initState() {
-    // TODO: implement initState
-
     super.initState();
   }
 
@@ -116,7 +115,55 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          //右侧二维码图片
+          //右侧 3个竖向排列 文本按钮
+          Positioned(
+            right: 30.w,
+            top: 57.h,
+            bottom: 50,
+            child:Column(
+              children: [
+                //文本按钮
+                TextButton(
+                  onPressed: () {
+                    ct.isPlayState.value = !ct.isPlayState.value;
+                  },
+                  child: Text(
+                    '播放随机视频',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    getDownloadVideoList();
+                  },
+                  child: Text(
+                    '下载播放列表',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    vct.changeVideo(
+                        'https://www.runoob.com/try/demo_source/movie.mp4',
+                        '视频标题');
+                  },
+                  child: Text(
+                    '播放指定视频',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ),
 
           //底部电影封面列表 使用插件infinite_carousel
           Positioned(

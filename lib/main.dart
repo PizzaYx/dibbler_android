@@ -9,6 +9,8 @@ import 'downLoadStore.dart';
 import 'homeController.dart';
 import 'homePage.dart';
 import 'sqlStore.dart';
+import 'video_view.dart';
+import 'webSocket.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,13 +28,20 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     //SQL
     Get.put<SqlStore>(SqlStore());
-
     //下载
     Get.put<DownLoadStore>(DownLoadStore());
+    //视频
+    Get.put<VideoController>(VideoController());
+    //websocket
+    Get.put<WebSocketController>(WebSocketController());
+
+    //初始化
+
     //初始化下载
     return ScreenUtilInit(
       designSize: const Size(960, 540),
