@@ -11,7 +11,6 @@ import 'entities.dart';
 import 'webSocket.dart';
 import 'video_view.dart';
 
-
 //测试数据
 List<String> movieCovers = [
   'https://img.zcool.cn/community/0198425d33fa68a80120695c145f04.jpg@1280w_1l_2o_100sh.jpg',
@@ -25,7 +24,7 @@ List<String> movieCovers = [
 
 class HomeController extends GetxController {
   //当前页面状态  false 默认显示图片 true.播放视频
-  var isPlayState = false.obs;
+  var isPlayState = true.obs;
 
   //设备唯一标识
   late final String deviceId;
@@ -38,9 +37,9 @@ class HomeController extends GetxController {
 
   @override
   void onInit() async {
-    await Permission.storage.request().isGranted;
-
     //-------逻辑顺序-------
+    SqlStore.to.openDatabaseConnection();
+    getLocalSQLlPath();
     //右上时间
     updateTime();
     //获取设备唯一标识
@@ -49,18 +48,14 @@ class HomeController extends GetxController {
     webSocket.startStream();
     webSocket.startHeartbeat();
 
-    //每隔10分钟获取一次视频列表 并且马上开始执行1次
-    Timer.periodic(const Duration(minutes: 10), (timer) {
+    //延迟20S执行一次getDownloadVideoList()方法后每隔10分钟执行一次
+    Future.delayed(const Duration(seconds: 20), () {
       getDownloadVideoList();
     });
 
-    //延迟20S开始播放随机视频
-    Future.delayed(const Duration(seconds: 10), () {
+    //每隔10分钟获取一次视频列表 并且马上开始执行1次
+    Timer.periodic(const Duration(minutes: 10), (timer) {
       getDownloadVideoList();
-      //初始获取一次 随机播放的视频  注意 第一次启动本地没有数据 会报错
-      vct.setAutoPlayUrlTitle();
-
-      // isPlayState.value = true;
     });
 
     //------------------------
@@ -84,7 +79,6 @@ class HomeController extends GetxController {
             movies[i].cover, movies[i].title, "unKnown", '', movies[i].synchro);
       }
     }
-
 
     //下载新电影 并且查找表中所有电影的状态不为succeeded的电影
     List<Map<String, Object?>> resultSet =
@@ -138,6 +132,15 @@ class HomeController extends GetxController {
   }
 
 //--------------视频-----------------
+//下载成功一次就随机获取一次数据库视频
+  void getRandomDownloadMovie() {
+    vct.setAutoPlayUrlTitle();
+  }
+
+//设置指定播放视频列表
+  void setPlayList(List<PlayVideo> data) {
+    vct.setVideoList(data);
+  }
 
 //-----------------------------------
 }

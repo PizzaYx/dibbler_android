@@ -14,7 +14,7 @@ class DownLoadStore extends GetxController {
     super.onInit();
   }
 
-  void initialize() {
+  Future<void> initialize() async {
     ALDownloader.initialize();
 
     ALDownloader.configurePrint(true, frequentEnabled: false);
@@ -22,16 +22,16 @@ class DownLoadStore extends GetxController {
 
   //外部传入数据并下载
   void setMoviesDownload(String url, String status) {
-
     downloadForUrl(url);
   }
 
   //下载
-  void downloadForUrl(String url) {
+  Future<void> downloadForUrl(String url) async {
     String name = url.split('/').last;
+    String savePath = await getLocalSQLlPath();
     ALDownloader.download(url,
         fileName: name,
-        directoryPath: localVideoPath,
+        directoryPath: savePath,
         handlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint('ALDownloader | 下载进度 = $progress, url = $url\n');
@@ -45,24 +45,6 @@ class DownLoadStore extends GetxController {
           debugPrint('ALDownloader | 下载暂停, url = $url\n');
           SqlStore.to.updateDownloadStatus(url, 'paused');
         }));
-  }
-
-  //持久句柄池
-  void addForeverHandlerInterface(String url) {
-    ALDownloader.addHandlerInterface(
-        ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint('ALDownloader | 下载进度 = $progress, url = $url\n');
-        }, succeededHandler: () async {
-          debugPrint('ALDownloader | 下载成功, url = $url\n');
-          successAction(url);
-        }, failedHandler: () {
-          debugPrint('ALDownloader | 下载失败, url = $url\n');
-          SqlStore.to.updateDownloadStatus(url, 'failed');
-        }, pausedHandler: () {
-          debugPrint('ALDownloader | 下载暂停, url = $url\n');
-          SqlStore.to.updateDownloadStatus(url, 'paused');
-        }),
-        url);
   }
 
   //下载成功处理
@@ -97,14 +79,6 @@ class DownLoadStore extends GetxController {
     ALDownloader.remove(url);
   }
 
-  //
-  // void cancelAllAction() {
-  //   ALDownloader.cancelAll();
-  // }
-  //
-  // void removeAllAction() {
-  //   ALDownloader.removeAll();
-  // }
 
   //获取下载本地路径
   Future<String?> getLocalPath(String url) async {

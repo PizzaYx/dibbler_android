@@ -24,7 +24,7 @@ class SqlStore extends GetxController {
   /// 打开数据库
   Future<void> openDatabaseConnection() async {
 
-    String dibblerPath = await getLocalPath();
+    String dibblerPath = await getLocalSQLlPath();
 
    // String databasePath = await getDatabasesPath();
     String databaseName = 'download.db';
@@ -109,6 +109,17 @@ class SqlStore extends GetxController {
       return '';
     } else {
       return list[0]['movieId'] as String;
+    }
+  }
+
+  //根据movieId 获取url
+  Future<String> queryUrl(String movieId) async {
+    List<Map<String, Object?>> list =
+        await db.query('download', where: 'movieId = ?', whereArgs: [movieId]);
+    if (list.isEmpty) {
+      return '';
+    } else {
+      return list[0]['url'] as String;
     }
   }
 

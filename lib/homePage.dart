@@ -149,9 +149,9 @@ class _HomePageState extends State<HomePage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    vct.changeVideo(
-                        'https://www.runoob.com/try/demo_source/movie.mp4',
-                        '视频标题');
+                    // vct.changeVideo(
+                    //     'https://www.runoob.com/try/demo_source/movie.mp4',
+                    //     '视频标题');
                   },
                   child: Text(
                     '播放指定视频',

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
+// import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
@@ -14,7 +14,10 @@ import 'webSocket.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  FlutterDownloader.initialize(debug: true);
+  //  FlutterDownloader.initialize(
+  //     debug: true, // optional: set to false to disable printing logs to console (default: true)
+  //     ignoreSsl: true // option: set to false to disable working with http links (default: false)
+  // );
   // 隐藏状态栏
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   // 设置设备方向

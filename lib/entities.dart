@@ -34,3 +34,29 @@ class DownloadMovie {
         'isDownload': synchro
       };
 }
+
+//videoID ,id 播放视频列表
+class PlayVideo {
+  String videoId;
+  String id;
+  String title;
+  String nickname;
+  String truename;
+
+  PlayVideo(this.videoId, this.id, this.title, this.nickname, this.truename);
+
+  PlayVideo.fromJson(Map<String, dynamic> json)
+      : videoId = json['videoId'],
+        id = json['id'],
+        title = json['title'],
+        nickname = json['nickname'],
+        truename = json['truename'];
+
+  Map<String, dynamic> toJson() => {
+        'videoId': videoId,
+        'id': id,
+        'title': title,
+        'nickname': nickname,
+        'truename': truename
+      };
+}
