@@ -29,8 +29,6 @@ class DownloadMovie {
         'imgpath': cover,
         'videopath': url,
         'title': title,
-        // 'downLoadStatus': downLoadStatus,
-        // 'localPath': localPath,
         'isDownload': synchro
       };
 }
@@ -42,21 +40,36 @@ class PlayVideo {
   String title;
   String nickname;
   String truename;
+  String createTime;
+  int isplay;
 
-  PlayVideo(this.videoId, this.id, this.title, this.nickname, this.truename);
+  PlayVideo(this.videoId, this.id, this.title, this.nickname, this.truename,
+      this.createTime,
+      {this.isplay = 0});
 
   PlayVideo.fromJson(Map<String, dynamic> json)
       : videoId = json['videoId'],
         id = json['id'],
         title = json['title'],
         nickname = json['nickname'],
-        truename = json['truename'];
+        truename = json['truename'],
+        createTime = json['createTime'].toString(),
+        isplay = 0;
 
   Map<String, dynamic> toJson() => {
         'videoId': videoId,
         'id': id,
         'title': title,
         'nickname': nickname,
-        'truename': truename
+        'truename': truename,
+        'createTime': createTime,
       };
+}
+
+//封面图 和 标题
+class CoverTitle {
+  String cover;
+  String title;
+
+  CoverTitle(this.cover, this.title); //构造函数
 }

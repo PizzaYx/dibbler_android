@@ -10,15 +10,18 @@ class WebSocketController extends GetxController {
   late IOWebSocketChannel channel;
   var message = ''.obs;
   late Timer _timer;
+  bool isConnected = true;
 
   @override
   void onInit() {
     super.onInit();
   }
 
-  void startStream() {
+  void startStream() async {
+    isConnected = true;
+    String deviceId = await getDeviceId();
     channel = IOWebSocketChannel.connect(
-        'ws://192.168.0.148:8090/websocket/$getDeviceId()');
+        'ws://192.168.0.148:8090/websocket/$deviceId');
     channel.stream.listen((event) {
       //解析{"data":"添加视频成功","type":"video"}获取出type和data的值
       var json = jsonDecode(event);
@@ -28,23 +31,27 @@ class WebSocketController extends GetxController {
         //如果是video类型，就获取视频列表
         getDownloadVideoList();
       } else if (type == "pay") {
-       //获取播放视频
+        //获取播放视频
         getVideoPlayList();
       }
 
       print('接收消息-------$event');
     }, onError: (error) {
-      // 延迟 10s后重新连接
-      print('接收消息错误-------$error');
-      Timer(const Duration(seconds: 10), () {
-        channel.sink.close();
-        startStream();
-      });
-    }, onDone: () {
-      print('接收消息完成-------');
-      // Timer(const Duration(seconds: 10), () {
+      // // 延迟 10s后重新连接
+      // Future.delayed(const Duration(seconds: 10), () {
+      //   print('接收消息错误-------$error');
+      //   channel.sink.close();
+      //   isConnected = false;
       //   startStream();
       // });
+
+    }, onDone: () {
+      Future.delayed(const Duration(seconds: 10), () {
+        print('接收消息关闭-------');
+        channel.sink.close();
+        isConnected = false;
+        startStream();
+      });
     });
   }
 
@@ -55,8 +62,9 @@ class WebSocketController extends GetxController {
   }
 
   void startHeartbeat() {
-    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      channel.sink.add('heartbeat');
+    _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
+        channel.sink.add('heartbeat');
+        print('心跳检查-------');
     });
   }
 

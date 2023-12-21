@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dibbler_android/sqlStore.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -11,23 +8,12 @@ import 'entities.dart';
 import 'webSocket.dart';
 import 'video_view.dart';
 
-//测试数据
-List<String> movieCovers = [
-  'https://img.zcool.cn/community/0198425d33fa68a80120695c145f04.jpg@1280w_1l_2o_100sh.jpg',
-  'https://img.zcool.cn/community/0130215bf57cb3a80121ab5db623c5.jpg@1280w_1l_2o_100sh.jpg',
-  'https://tse3-mm.cn.bing.net/th/id/OIP-C.BgnDJDbZpCZEn_kNffv8QgHaKd?rs=1&pid=ImgDetMain',
-  'https://pic.ntimg.cn/file/20211105/10500364_101835253103_2.jpg',
-  'https://pic.ntimg.cn/file/20211213/24787180_221806192127_2.jpg',
-  'https://puui.qpic.cn/vcover_vt_pic/0/21lkd9oax1s2slit1463754775.jpg/0',
-  // 添加更多电影封面图链接
-];
-
 class HomeController extends GetxController {
   //当前页面状态  false 默认显示图片 true.播放视频
   var isPlayState = true.obs;
 
   //设备唯一标识
-  late final String deviceId;
+  var deviceId = ''.obs;
 
   //视频播放管理器
   final VideoController vct = Get.find<VideoController>();
@@ -35,31 +21,63 @@ class HomeController extends GetxController {
   //websocket管理器
   final WebSocketController webSocket = Get.find<WebSocketController>();
 
+  //所有电影列表
+  var allVideoList = [].obs;
+
   @override
   void onInit() async {
+    var result = await Permission.storage.request().isDenied;
+    var local = await Permission.photos.request().isDenied;
+
     //-------逻辑顺序-------
     SqlStore.to.openDatabaseConnection();
-    getLocalSQLlPath();
     //右上时间
     updateTime();
     //获取设备唯一标识
-    getDeviceId();
+    deviceId.value = await getDeviceId();
     //连接websocket
     webSocket.startStream();
     webSocket.startHeartbeat();
 
+    //延迟是sql 打开或创建较慢
     //延迟20S执行一次getDownloadVideoList()方法后每隔10分钟执行一次
-    Future.delayed(const Duration(seconds: 20), () {
+    Future.delayed(const Duration(seconds: 10), () async {
       getDownloadVideoList();
+      getAllCoverTitle();
+      vct.getVideoList();
     });
 
     //每隔10分钟获取一次视频列表 并且马上开始执行1次
-    Timer.periodic(const Duration(minutes: 10), (timer) {
+    Timer.periodic(const Duration(minutes: 10), (timer) async {
       getDownloadVideoList();
+      // //查询下载失败的电影重新下载
+      // List<String> resultSet =  await SqlStore.to.querySynchro();
+      // if(resultSet.isNotEmpty){
+      //   for (int i = 0; i < resultSet.length; i++) {
+      //     DownLoadStore.to.setMoviesDownload(resultSet[i], 'failed');
+      //   }
+      // }
+
     });
 
     //------------------------
     super.onInit();
+  }
+
+  //获取数据库所有的cover和title
+  void getAllCoverTitle() async {
+    //获取所有电影列表
+    List<Map<String, Object?>> resultSet = await SqlStore.to.queryAllDownload();
+    if (resultSet.isNotEmpty) {
+      //只获取 Cover 和title
+      for (var item in resultSet) {
+        CoverTitle coverTitle =
+            CoverTitle(item["cover"].toString(), item["title"].toString());
+        allVideoList.add(coverTitle);
+      }
+    } else {
+      print('数据库中没有电影');
+    }
   }
 
   @override
@@ -102,6 +120,7 @@ class HomeController extends GetxController {
         DownLoadStore.to.setMoviesDownload(
             needDownloadMovies[i].url, needDownloadMovies[i].downLoadStatus);
       }
+      getAllCoverTitle();
     } else {
       print('没有需要下载的电影');
     }
@@ -137,10 +156,29 @@ class HomeController extends GetxController {
     vct.setAutoPlayUrlTitle();
   }
 
-//设置指定播放视频列表
+  //设置指定播放视频订单列表
   void setPlayList(List<PlayVideo> data) {
-    vct.setVideoList(data);
+    //先存入数据库
+    for (int i = 0; i < data.length; i++) {
+      SqlStore.to.insertOrders(
+        data[i].id,
+        data[i].videoId,
+        data[i].title,
+        data[i].nickname,
+        data[i].truename,
+        data[i].createTime,
+      );
+    }
+    //播放的视频
+     vct.getVideoList();
   }
+
+  //移除本地数据库订单列表的数据
+  // void removeOrders(String videoId) {
+  //   SqlStore.to.deleteOrders(videoId);
+  //   //重新获取播放列表
+  //   vct.getVideoList();
+  // }
 
 //-----------------------------------
 }

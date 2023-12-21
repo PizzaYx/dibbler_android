@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:dibbler_android/scrollingText.dart';
 import 'package:dibbler_android/sqlStore.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
@@ -16,7 +17,6 @@ final HomeController ct = Get.find<HomeController>();
 
 //设置SQL存储路径
 Future<String> getLocalSQLlPath() async {
-  await Permission.storage.request().isGranted;
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
   String sqlPath = '';
@@ -76,8 +76,9 @@ Future<String> getDeviceId() async {
 Future<void> getDownloadVideoList() async {
   List<DownloadMovie> movies = [];
   try {
-    var response = await Dio()
-        .get("${baseUrl}getDownloadVideoList?clientId=${getDeviceId()}");
+    String deviceId = await getDeviceId();
+    var response =
+        await Dio().get("${baseUrl}getDownloadVideoList?clientId=$deviceId");
     print(response.data);
     if (response.data['code'] == 200) {
       List<dynamic> data = response.data['data'];
@@ -96,11 +97,12 @@ Future<void> getDownloadVideoList() async {
 //更新视频下载状态
 Future<void> updateVideoIsDownload(String movieId) async {
   try {
-    var response = await Dio().get(
-        "${baseUrl}updateVideoIsDownload?id=$movieId&clientId=${getDeviceId()}");
+    String deviceId = await getDeviceId();
+    var response = await Dio()
+        .get("${baseUrl}updateVideoIsDownload?id=$movieId&clientId=$deviceId");
     print(response.data);
     if (response.data['code'] == 200) {
-      // Get.snackbar('提示', '更新成功');
+
       //更新数据库
       SqlStore.to.updateSynchro(movieId, -1);
       //随机获取
@@ -115,18 +117,18 @@ Future<void> updateVideoIsDownload(String movieId) async {
 Future<void> getVideoPlayList() async {
   List<PlayVideo> movies = [];
   try {
+    String deviceId = await getDeviceId();
+
     var response =
-        await Dio().get("${baseUrl}getVideoPlayList?clientId=${getDeviceId()}");
+        await Dio().get("${baseUrl}getVideoPlayList?clientId=$deviceId");
 
     if (response.data['code'] == 200) {
       List<dynamic> data = response.data['data'];
-
+      String moveString = '';
       for (int i = 0; i < data.length; i++) {
         movies.add(PlayVideo.fromJson(data[i]));
       }
-
-        ct.setPlayList(movies);
-
+      ct.setPlayList(movies);
     }
   } catch (e) {
     print(e);
@@ -138,7 +140,7 @@ Future<void> delVideoPlayList(String id) async {
   try {
     var response = await Dio().get("${baseUrl}delVideoPlayList?id=$id");
     if (response.data['code'] == 200) {
-      getVideoPlayList();
+      print("数据库移除成功");
     }
   } catch (e) {
     print(e);

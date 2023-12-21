@@ -16,7 +16,6 @@ class DownLoadStore extends GetxController {
 
   Future<void> initialize() async {
     ALDownloader.initialize();
-
     ALDownloader.configurePrint(true, frequentEnabled: false);
   }
 
