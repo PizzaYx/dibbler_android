@@ -14,10 +14,6 @@ import 'webSocket.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  //  FlutterDownloader.initialize(
-  //     debug: true, // optional: set to false to disable printing logs to console (default: true)
-  //     ignoreSsl: true // option: set to false to disable working with http links (default: false)
-  // );
   // 隐藏状态栏
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   // 设置设备方向
@@ -30,7 +26,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -46,21 +41,23 @@ class MyApp extends StatelessWidget {
     //初始化
 
     //初始化下载
-    return ScreenUtilInit(
-      designSize: const Size(960, 540),
-      minTextAdapt: false,
-      splitScreenMode: false,
-      builder: (context, child) {
-        return GetMaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: '点播器',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-            useMaterial3: true,
-          ),
-          home: const HomePage(),
-        );
-      },
+    return  ClipOval(
+      child: ScreenUtilInit(
+        designSize: const Size(960, 960),
+        minTextAdapt: false,
+        splitScreenMode: false,
+        builder: (context, child) {
+          return GetMaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: '点播器',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+            ),
+            home:  const HomePage(),
+          );
+        },
+      ),
     );
   }
 }

@@ -26,6 +26,7 @@ class HomeController extends GetxController {
 
   @override
   void onInit() async {
+    //权限
     var result = await Permission.storage.request().isDenied;
     var local = await Permission.photos.request().isDenied;
 
@@ -130,7 +131,7 @@ class HomeController extends GetxController {
   //星期几
   var weekDay = ''.obs;
 
-  //年月日
+  //月日
   var date = ''.obs;
 
   //时间
@@ -142,11 +143,11 @@ class HomeController extends GetxController {
       DateTime now = DateTime.now();
       List<String> weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
       weekDay.value = weekdays[now.weekday - 1];
-      date.value = '${now.year}-${now.month}-${now.day}';
+      date.value = '${now.month}-${now.day}';
       //判断需要补0 24小时制
       String hour = now.hour < 10 ? '0${now.hour}' : '${now.hour}';
       String minute = now.minute < 10 ? '0${now.minute}' : '${now.minute}';
-      time.value = '$hour : $minute';
+      time.value = '$hour:$minute';
     });
   }
 
