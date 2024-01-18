@@ -49,12 +49,12 @@ class SqlStore extends GetxController {
           // 创建 download 表
           await database.execute(
             'CREATE TABLE a_download (id INTEGER PRIMARY KEY, movieId TEXT, url TEXT,'
-                ' cover TEXT, title TEXT, status TEXT, localPath TEXT, synchro INTEGER)',
+            ' cover TEXT, title TEXT, status TEXT, localPath TEXT, intro TEXT,synchro INTEGER)',
           );
           // 创建 orders 表
           await database.execute(
-            'CREATE TABLE a_orders (id TEXT PRIMARY KEY ,videoId TEXT,  title TEXT, nickname TEXT,'
-                ' truename TEXT, isplay INTEGER,createTime TEXT)',
+            'CREATE TABLE a_orders (id TEXT PRIMARY KEY ,videoId TEXT, title TEXT, nickname TEXT,'
+            ' truename TEXT, isplay INTEGER,createTime TEXT)',
           );
         },
       );
@@ -63,8 +63,15 @@ class SqlStore extends GetxController {
 
   //---------------------下载download sql----------------------
   /// 插入电影Id编号，电影封面图链接，电影下载链接，电影下载状态
-  Future<void> insertDownload(String movieId, String url, String cover,
-      String title, String status, String localPath, int synchro) async {
+  Future<void> insertDownload(
+      String movieId,
+      String url,
+      String cover,
+      String title,
+      String status,
+      String localPath,
+      String intro,
+      int synchro) async {
     int isSuccess = await db.insert('a_download', {
       'movieId': movieId,
       'cover': cover,
@@ -72,6 +79,7 @@ class SqlStore extends GetxController {
       'title': title,
       'status': status,
       'localPath': localPath,
+      'intro': intro,
       'synchro': synchro
     });
     print('insertDownload --$isSuccess');
@@ -114,7 +122,7 @@ class SqlStore extends GetxController {
   //查询下载状态为0的数据的 返回url 返回类型类型List<String>
   Future<List<String>> querySynchro() async {
     List<Map<String, Object?>> list =
-    await db.query('a_download', where: 'synchro = ?', whereArgs: [0]);
+        await db.query('a_download', where: 'synchro = ?', whereArgs: [0]);
     List<String> urlList = [];
     if (list.isEmpty) {
       return urlList;
@@ -135,7 +143,7 @@ class SqlStore extends GetxController {
   //根据url 获取movieId
   Future<String> queryMovieId(String url) async {
     List<Map<String, Object?>> list =
-    await db.query('a_download', where: 'url = ?', whereArgs: [url]);
+        await db.query('a_download', where: 'url = ?', whereArgs: [url]);
     if (list.isEmpty) {
       return '';
     } else {
@@ -145,8 +153,8 @@ class SqlStore extends GetxController {
 
   //根据movieId 获取LocalPath 和title
   Future<String> queryLocalPath(String movieId) async {
-    List<Map<String, Object?>> list =
-    await db.query('a_download', where: 'movieId = ?', whereArgs: [movieId]);
+    List<Map<String, Object?>> list = await db
+        .query('a_download', where: 'movieId = ?', whereArgs: [movieId]);
     if (list.isEmpty) {
       return '';
     } else {
@@ -162,8 +170,8 @@ class SqlStore extends GetxController {
 
   // 根据movieId查询数据库中是否有该电影 返回bool
   Future<bool> queryDownload(String movieId) async {
-    List<Map<String, Object?>> list =
-    await db.query('a_download', where: 'movieId = ?', whereArgs: [movieId]);
+    List<Map<String, Object?>> list = await db
+        .query('a_download', where: 'movieId = ?', whereArgs: [movieId]);
     if (list.isEmpty) {
       return false;
     } else {
@@ -181,6 +189,13 @@ class SqlStore extends GetxController {
   //查询所有所有数据
   Future<List<Map<String, Object?>>> queryAllDownload() async {
     List<Map<String, Object?>> list = await db.query('a_download');
+    return list;
+  }
+
+  //查询6个数据 如果不满6个，则返回6个一样的数据
+  Future<List<Map<String, Object?>>> querySixDownload() async {
+    List<Map<String, Object?>> list = await db.rawQuery(
+        "SELECT * FROM a_download WHERE status = 'succeeded' ORDER BY RANDOM() LIMIT 6");
     return list;
   }
 
@@ -242,7 +257,7 @@ class SqlStore extends GetxController {
   //判断是否有存在isplay = 1的数据
   Future<bool> queryIsPlay() async {
     List<Map<String, Object?>> list =
-    await db.query('a_orders', where: 'isplay = ?', whereArgs: [1]);
+        await db.query('a_orders', where: 'isplay = ?', whereArgs: [1]);
     if (list.isEmpty) {
       return false;
     } else {
@@ -257,11 +272,10 @@ class SqlStore extends GetxController {
 
   //查询所有数据并且根据createTime排序
   Future<List<Map<String, Object?>>> queryAllOrders() async {
-    List<Map<String, dynamic>> list = await db
-        .rawQuery('SELECT * FROM a_orders ORDER BY CAST(createTime AS INTEGER) ASC');
-        return list;
-    }
-
+    List<Map<String, dynamic>> list = await db.rawQuery(
+        'SELECT * FROM a_orders ORDER BY CAST(createTime AS INTEGER) ASC');
+    return list;
+  }
 
 //-------------------------------------------------------
 }

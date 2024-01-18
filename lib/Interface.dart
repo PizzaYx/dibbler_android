@@ -72,7 +72,7 @@ Future<String> getDeviceId() async {
   }
 }
 
-//获取视频列表
+//获取下载视频列表
 Future<void> getDownloadVideoList() async {
   List<DownloadMovie> movies = [];
   try {

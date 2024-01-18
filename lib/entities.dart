@@ -4,7 +4,7 @@ import 'package:dibbler_android/Interface.dart';
 
 class DownloadMovie {
   //downLoadStatus localPath 默认值为’‘
-  DownloadMovie(this.movieId, this.url, this.cover, this.title, this.synchro,
+  DownloadMovie(this.movieId, this.url, this.cover, this.title,this.intro, this.synchro,
       {this.downLoadStatus = 'unKnown', this.localPath = ''});
 
   String movieId;
@@ -13,6 +13,7 @@ class DownloadMovie {
   String title;
   String downLoadStatus;
   String localPath;
+  String intro;
   int synchro;
 
   DownloadMovie.fromJson(Map<String, dynamic> json)
@@ -22,6 +23,7 @@ class DownloadMovie {
         title = json['title'],
         downLoadStatus = 'unKnown',
         localPath = '',
+        intro = json['intro'],
         synchro = json['isDownload'];
 
   Map<String, dynamic> toJson() => {
@@ -29,6 +31,7 @@ class DownloadMovie {
         'imgpath': cover,
         'videopath': url,
         'title': title,
+        'intro': intro,
         'isDownload': synchro
       };
 }
@@ -66,10 +69,10 @@ class PlayVideo {
       };
 }
 
-//封面图 和 标题
+//封面图 标题 简介
 class CoverTitle {
   String cover;
   String title;
-
-  CoverTitle(this.cover, this.title); //构造函数
+  String introduction;
+  CoverTitle(this.cover, this.title,this.introduction); //构造函数
 }

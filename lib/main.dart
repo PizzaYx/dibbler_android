@@ -17,11 +17,7 @@ void main() {
   // 隐藏状态栏
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   // 设置设备方向
-  SystemChrome.setPreferredOrientations(
-          [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight])
-      .then((_) {
-    runApp(const MyApp());
-  });
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -43,7 +39,7 @@ class MyApp extends StatelessWidget {
     //初始化下载
     return  ClipOval(
       child: ScreenUtilInit(
-        designSize: const Size(960, 960),
+        designSize:  const Size(1533, 1533),
         minTextAdapt: false,
         splitScreenMode: false,
         builder: (context, child) {

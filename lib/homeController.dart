@@ -21,8 +21,14 @@ class HomeController extends GetxController {
   //websocket管理器
   final WebSocketController webSocket = Get.find<WebSocketController>();
 
-  //所有电影列表
+  //所有电影列表信息
   var allVideoList = [].obs;
+
+  //页面显示6组数据
+  var sixVideoList = <CoverTitle>[].obs;
+
+  //当前播放视频下标
+  var randomIndex = 0.obs;
 
   @override
   void onInit() async {
@@ -32,7 +38,7 @@ class HomeController extends GetxController {
 
     //-------逻辑顺序-------
     SqlStore.to.openDatabaseConnection();
-    //右上时间
+    //时间
     updateTime();
     //获取设备唯一标识
     deviceId.value = await getDeviceId();
@@ -42,23 +48,24 @@ class HomeController extends GetxController {
 
     //延迟是sql 打开或创建较慢
     //延迟20S执行一次getDownloadVideoList()方法后每隔10分钟执行一次
-    Future.delayed(const Duration(seconds: 10), () async {
+    Future.delayed(const Duration(seconds: 20), () async {
       getDownloadVideoList();
-      getAllCoverTitle();
+      querySixDownload();
+      // getAllCoverTitle();
       vct.getVideoList();
     });
 
     //每隔10分钟获取一次视频列表 并且马上开始执行1次
     Timer.periodic(const Duration(minutes: 10), (timer) async {
       getDownloadVideoList();
-      // //查询下载失败的电影重新下载
+      querySixDownload();
+      //查询下载失败的电影重新下载
       // List<String> resultSet =  await SqlStore.to.querySynchro();
       // if(resultSet.isNotEmpty){
       //   for (int i = 0; i < resultSet.length; i++) {
       //     DownLoadStore.to.setMoviesDownload(resultSet[i], 'failed');
       //   }
       // }
-
     });
 
     //------------------------
@@ -73,7 +80,7 @@ class HomeController extends GetxController {
       //只获取 Cover 和title
       for (var item in resultSet) {
         CoverTitle coverTitle =
-            CoverTitle(item["cover"].toString(), item["title"].toString());
+            CoverTitle(item["cover"].toString(), item["title"].toString(), '');
         allVideoList.add(coverTitle);
       }
     } else {
@@ -81,10 +88,26 @@ class HomeController extends GetxController {
     }
   }
 
-  @override
-  void onClose() {
-    super.onClose();
+  //获取数据库随机6个cover title Introduction
+  void querySixDownload() async {
+    //获取所有电影列表
+    List<Map<String, Object?>> resultSet = await SqlStore.to.querySixDownload();
+    if (resultSet.isNotEmpty) {
+      sixVideoList.clear();
+      for (var item in resultSet) {
+        CoverTitle coverTitle = CoverTitle(item["cover"].toString(),
+            item["title"].toString(), item["intro"].toString());
+        sixVideoList.add(coverTitle);
+      }
+    } else {
+      print('数据库中没有电影');
+    }
   }
+
+  // @override
+  // void onClose() {
+  //   super.onClose();
+  // }
 
   // 先存储在sql中
   Future<void> handlingLinks(List<DownloadMovie> movies) async {
@@ -94,8 +117,15 @@ class HomeController extends GetxController {
       bool isExist = await SqlStore.to.queryDownload(movies[i].movieId);
       if (isExist == false) {
         //插入数据库
-        SqlStore.to.insertDownload(movies[i].movieId, movies[i].url,
-            movies[i].cover, movies[i].title, "unKnown", '', movies[i].synchro);
+        SqlStore.to.insertDownload(
+            movies[i].movieId,
+            movies[i].url,
+            movies[i].cover,
+            movies[i].title,
+            "unKnown",
+            '',
+            movies[i].intro,
+            movies[i].synchro);
       }
     }
 
@@ -110,6 +140,7 @@ class HomeController extends GetxController {
           resultSet[i]['url'] as String,
           resultSet[i]['cover'] as String,
           resultSet[i]['title'] as String,
+          resultSet[i]['intro'] as String,
           resultSet[i]['synchro'] as int,
           downLoadStatus: resultSet[i]['status'] as String,
         );
@@ -171,15 +202,15 @@ class HomeController extends GetxController {
       );
     }
     //播放的视频
-     vct.getVideoList();
+    vct.getVideoList();
   }
 
-  //移除本地数据库订单列表的数据
-  // void removeOrders(String videoId) {
-  //   SqlStore.to.deleteOrders(videoId);
-  //   //重新获取播放列表
-  //   vct.getVideoList();
-  // }
+//移除本地数据库订单列表的数据
+// void removeOrders(String videoId) {
+//   SqlStore.to.deleteOrders(videoId);
+//   //重新获取播放列表
+//   vct.getVideoList();
+// }
 
 //-----------------------------------
 }
