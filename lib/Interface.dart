@@ -1,15 +1,14 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:dibbler_android/scrollingText.dart';
-import 'package:dibbler_android/sqlStore.dart';
+import 'package:dibbler_android/tools/sqlStore.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'entities.dart';
-import 'homeController.dart';
+import 'home/homeController.dart';
 
 //域名头
 String baseUrl = "http://192.168.0.148:8090/clientport/";
@@ -28,9 +27,12 @@ Future<String> getLocalSQLlPath() async {
     String path = await ExternalPath.getExternalStoragePublicDirectory(
         ExternalPath.DIRECTORY_DOWNLOADS);
     // Obtain shared preferences.
+    //下载视频存放
     createFolder('$path/dib/');
+    //sql
+    createFolder('$path/dib/sql/');
     sqlPath = '$path/dib/';
-    prefs.setString('localSQLPath', sqlPath);
+    prefs.setString('localPath', sqlPath);
     return sqlPath;
   }
 }
@@ -74,16 +76,16 @@ Future<String> getDeviceId() async {
 
 //获取下载视频列表
 Future<void> getDownloadVideoList() async {
-  List<DownloadMovie> movies = [];
+  List<MovieData> movies = [];
   try {
     String deviceId = await getDeviceId();
     var response =
         await Dio().get("${baseUrl}getDownloadVideoList?clientId=$deviceId");
-    print(response.data);
+    debugPrint(response.data.toString());
     if (response.data['code'] == 200) {
       List<dynamic> data = response.data['data'];
       for (int i = 0; i < data.length; i++) {
-        movies.add(DownloadMovie.fromJson(data[i]));
+        movies.add(MovieData.fromJson(data[i]));
       }
       if (movies.isNotEmpty) {
         ct.handlingLinks(movies);
@@ -102,11 +104,8 @@ Future<void> updateVideoIsDownload(String movieId) async {
         .get("${baseUrl}updateVideoIsDownload?id=$movieId&clientId=$deviceId");
     print(response.data);
     if (response.data['code'] == 200) {
-
       //更新数据库
       SqlStore.to.updateSynchro(movieId, -1);
-      //随机获取
-      ct.getRandomDownloadMovie();
     }
   } catch (e) {
     print(e);

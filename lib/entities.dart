@@ -2,9 +2,9 @@
 // localPath 本地下载路径,synchro与服务器同步下载状态 fromJson方法 tojson方法
 import 'package:dibbler_android/Interface.dart';
 
-class DownloadMovie {
+class MovieData {
   //downLoadStatus localPath 默认值为’‘
-  DownloadMovie(this.movieId, this.url, this.cover, this.title,this.intro, this.synchro,
+  MovieData(this.movieId, this.url, this.cover, this.title,this.intro, this.synchro,
       {this.downLoadStatus = 'unKnown', this.localPath = ''});
 
   String movieId;
@@ -16,7 +16,7 @@ class DownloadMovie {
   String intro;
   int synchro;
 
-  DownloadMovie.fromJson(Map<String, dynamic> json)
+  MovieData.fromJson(Map<String, dynamic> json)
       : movieId = json['id'],
         cover = json['imgpath2'],
         url = json['videopath2'],
@@ -69,10 +69,11 @@ class PlayVideo {
       };
 }
 
-//封面图 标题 简介
+//随机播放信息
 class CoverTitle {
   String cover;
   String title;
   String introduction;
-  CoverTitle(this.cover, this.title,this.introduction); //构造函数
+  String localPath;
+  CoverTitle(this.cover, this.title,this.introduction,this.localPath); //构造函数
 }

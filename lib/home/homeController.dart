@@ -1,32 +1,23 @@
 import 'dart:async';
-import 'package:dibbler_android/sqlStore.dart';
+import 'package:dibbler_android/tools/sqlStore.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'Interface.dart';
-import 'downLoadStore.dart';
-import 'entities.dart';
-import 'webSocket.dart';
-import 'video_view.dart';
+import '../Interface.dart';
+
+import '../entities.dart';
+import '../tools/downLoadStore.dart';
+import '../tools/webSocket.dart';
+import '../video/videoController.dart';
 
 class HomeController extends GetxController {
-  //当前页面状态  false 默认显示图片 true.播放视频
-  var isPlayState = true.obs;
-
   //设备唯一标识
   var deviceId = ''.obs;
-
   //视频播放管理器
   final VideoController vct = Get.find<VideoController>();
-
   //websocket管理器
   final WebSocketController webSocket = Get.find<WebSocketController>();
-
-  //所有电影列表信息
-  var allVideoList = [].obs;
-
   //页面显示6组数据
   var sixVideoList = <CoverTitle>[].obs;
-
   //当前播放视频下标
   var randomIndex = 0.obs;
 
@@ -37,6 +28,7 @@ class HomeController extends GetxController {
     var local = await Permission.photos.request().isDenied;
 
     //-------逻辑顺序-------
+    //打开数据库
     SqlStore.to.openDatabaseConnection();
     //时间
     updateTime();
@@ -48,7 +40,7 @@ class HomeController extends GetxController {
 
     //延迟是sql 打开或创建较慢
     //延迟20S执行一次getDownloadVideoList()方法后每隔10分钟执行一次
-    Future.delayed(const Duration(seconds: 20), () async {
+    Future.delayed(const Duration(seconds: 10), () async {
       getDownloadVideoList();
       querySixDownload();
       // getAllCoverTitle();
@@ -58,7 +50,6 @@ class HomeController extends GetxController {
     //每隔10分钟获取一次视频列表 并且马上开始执行1次
     Timer.periodic(const Duration(minutes: 10), (timer) async {
       getDownloadVideoList();
-      querySixDownload();
       //查询下载失败的电影重新下载
       // List<String> resultSet =  await SqlStore.to.querySynchro();
       // if(resultSet.isNotEmpty){
@@ -73,20 +64,20 @@ class HomeController extends GetxController {
   }
 
   //获取数据库所有的cover和title
-  void getAllCoverTitle() async {
-    //获取所有电影列表
-    List<Map<String, Object?>> resultSet = await SqlStore.to.queryAllDownload();
-    if (resultSet.isNotEmpty) {
-      //只获取 Cover 和title
-      for (var item in resultSet) {
-        CoverTitle coverTitle =
-            CoverTitle(item["cover"].toString(), item["title"].toString(), '');
-        allVideoList.add(coverTitle);
-      }
-    } else {
-      print('数据库中没有电影');
-    }
-  }
+  // void getAllCoverTitle() async {
+  //   //获取所有电影列表
+  //   List<Map<String, Object?>> resultSet = await SqlStore.to.queryAllDownload();
+  //   if (resultSet.isNotEmpty) {
+  //     //只获取 Cover 和title
+  //     for (var item in resultSet) {
+  //       CoverTitle coverTitle =
+  //           CoverTitle(item["cover"].toString(), item["title"].toString(), '');
+  //       allVideoList.add(coverTitle);
+  //     }
+  //   } else {
+  //     print('数据库中没有电影');
+  //   }
+  // }
 
   //获取数据库随机6个cover title Introduction
   void querySixDownload() async {
@@ -94,11 +85,22 @@ class HomeController extends GetxController {
     List<Map<String, Object?>> resultSet = await SqlStore.to.querySixDownload();
     if (resultSet.isNotEmpty) {
       sixVideoList.clear();
+
       for (var item in resultSet) {
         CoverTitle coverTitle = CoverTitle(item["cover"].toString(),
-            item["title"].toString(), item["intro"].toString());
+            item["title"].toString(), item["intro"].toString(), item["localPath"].toString());
         sixVideoList.add(coverTitle);
       }
+
+      //只是在下载数据不满6组的时候才会添加
+      //如果不满6组并且大于0组数据 则重复添加 总数保持6组
+      if (sixVideoList.length < 6 && sixVideoList.isNotEmpty) {
+        int nowLength = sixVideoList.length;
+        for (int i = 0; i < 6 - nowLength; ++i) {
+          sixVideoList.add(sixVideoList[i]);
+        }
+      }
+
     } else {
       print('数据库中没有电影');
     }
@@ -110,7 +112,7 @@ class HomeController extends GetxController {
   // }
 
   // 先存储在sql中
-  Future<void> handlingLinks(List<DownloadMovie> movies) async {
+  Future<void> handlingLinks(List<MovieData> movies) async {
     //遍历movies
     for (int i = 0; i < movies.length; i++) {
       //如果数据库中没有该电影
@@ -133,9 +135,9 @@ class HomeController extends GetxController {
     List<Map<String, Object?>> resultSet =
         await SqlStore.to.queryAllDownloadNotSucceeded();
     if (resultSet.isNotEmpty) {
-      List<DownloadMovie> needDownloadMovies = [];
+      List<MovieData> needDownloadMovies = [];
       for (int i = 0; i < resultSet.length; i++) {
-        DownloadMovie movie = DownloadMovie(
+        MovieData movie = MovieData(
           resultSet[i]['movieId'] as String,
           resultSet[i]['url'] as String,
           resultSet[i]['cover'] as String,
@@ -152,7 +154,7 @@ class HomeController extends GetxController {
         DownLoadStore.to.setMoviesDownload(
             needDownloadMovies[i].url, needDownloadMovies[i].downLoadStatus);
       }
-      getAllCoverTitle();
+      // getAllCoverTitle();
     } else {
       print('没有需要下载的电影');
     }
@@ -184,9 +186,9 @@ class HomeController extends GetxController {
 
 //--------------视频-----------------
 //下载成功一次就随机获取一次数据库视频
-  void getRandomDownloadMovie() {
-    vct.setAutoPlayUrlTitle();
-  }
+//   void getRandomDownloadMovie() {
+//     vct.setAutoPlayUrlTitle();
+//   }
 
   //设置指定播放视频订单列表
   void setPlayList(List<PlayVideo> data) {

@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'Interface.dart';
+import '../Interface.dart';
 
 class WebSocketController extends GetxController {
   late IOWebSocketChannel channel;

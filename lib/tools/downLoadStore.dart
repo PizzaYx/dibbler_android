@@ -1,7 +1,7 @@
 //下载管理器
 import 'package:al_downloader/al_downloader.dart';
 import 'package:dibbler_android/Interface.dart';
-import 'package:dibbler_android/sqlStore.dart';
+import 'package:dibbler_android/tools/sqlStore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
@@ -55,8 +55,19 @@ class DownLoadStore extends GetxController {
       //同步服务器接口
       String movieId = await SqlStore.to.queryMovieId(url);
       updateVideoIsDownload(movieId);
+      ///只是在下载数据不满6组的时候
+      videoCount();
     }
   }
+
+  //处理未有下载数据情况
+  void videoCount() async {
+     int haveCount =  await SqlStore.to.querySucceeded();
+     if(haveCount >= 3 && ct.sixVideoList.isEmpty){
+       ct.querySixDownload();
+     }
+  }
+
 
   //暂停所有下载
   void pauseAllAction() {

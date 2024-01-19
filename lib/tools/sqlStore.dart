@@ -8,38 +8,50 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'Interface.dart';
+import '../Interface.dart';
 
 class SqlStore extends GetxController {
   static SqlStore get to => Get.find();
 
-  late Database db;
+  Database? db;
 
   @override
   void onInit() {
-    openDatabaseConnection();
+    //openDatabaseConnection();
     super.onInit();
   }
 
-  // @override
-  // void onClose() async{
-  //   await db.close();
-  // }
+  @override
+  void onClose() async{
+    await db!.close();
+  }
 
   /// 打开数据库
   Future<void> openDatabaseConnection() async {
     String dibblerPath = await getLocalSQLlPath();
 
-    // String databasePath = await getDatabasesPath();
     String databaseName = 'a_download.db';
-    String path = join(dibblerPath, databaseName);
+    String path = join('$dibblerPath/sql', databaseName);
 
+    //删除1.txt文件
+   // File('$dibblerPath/1.txt').deleteSync();
+
+    // Directory('$dibblerPath/1.txt').deleteSync(recursive: false);
     // 检查数据库文件是否存在
     bool databaseExists = await File(path).exists();
 
     // 如果数据库文件存在，直接打开
     if (databaseExists) {
-      db = await openDatabase(path);
+      try{
+        db = await openDatabase(path);
+      }catch(e){
+       // //强行删除文件夹
+       //  Directory('$dibblerPath/sql/').deleteSync(recursive: true);
+       //  //重新创建sql文件夹
+       //  createFolder('$dibblerPath/sql/');
+       //  //重新打开数据库
+       //  openDatabaseConnection();
+      }
     } else {
       // 如果数据库不存在，创建数据库
       db = await openDatabase(
@@ -72,7 +84,7 @@ class SqlStore extends GetxController {
       String localPath,
       String intro,
       int synchro) async {
-    int isSuccess = await db.insert('a_download', {
+    int isSuccess = await db!.insert('a_download', {
       'movieId': movieId,
       'cover': cover,
       'url': url,
@@ -87,24 +99,24 @@ class SqlStore extends GetxController {
 
   /// 删除数据
   Future<void> deleteDownload(String movieId) async {
-    await db.delete('a_download', where: 'movieId = ?', whereArgs: [movieId]);
+    await db!.delete('a_download', where: 'movieId = ?', whereArgs: [movieId]);
   }
 
   /// 更新数据
-  Future<void> updateDownload(String movieId, String status) async {
-    await db.update(
-        'a_download',
-        {
-          'status': status,
-        },
-        where: 'movieId = ?',
-        whereArgs: [movieId]);
-  }
+  // Future<void> updateDownload(String movieId, String status) async {
+  //   await db.update(
+  //       'a_download',
+  //       {
+  //         'status': status,
+  //       },
+  //       where: 'movieId = ?',
+  //       whereArgs: [movieId]);
+  // }
 
   //根据url 更新数据的Status状态 如果为succeeded 则更新localPath
   Future<void> updateDownloadStatus(String url, String status,
       {String localPath = ''}) async {
-    await db.update('a_download', {'status': status, 'localPath': localPath},
+    await db!.update('a_download', {'status': status, 'localPath': localPath},
         where: 'url = ?', whereArgs: [url]);
   }
 
@@ -120,19 +132,19 @@ class SqlStore extends GetxController {
   // }
 
   //查询下载状态为0的数据的 返回url 返回类型类型List<String>
-  Future<List<String>> querySynchro() async {
-    List<Map<String, Object?>> list =
-        await db.query('a_download', where: 'synchro = ?', whereArgs: [0]);
-    List<String> urlList = [];
-    if (list.isEmpty) {
-      return urlList;
-    } else {
-      for (int i = 0; i < list.length; i++) {
-        urlList.add(list[i]['url'] as String);
-      }
-      return urlList;
-    }
-  }
+  // Future<List<String>> querySynchro() async {
+  //   List<Map<String, Object?>> list =
+  //       await db.query('a_download', where: 'synchro = ?', whereArgs: [0]);
+  //   List<String> urlList = [];
+  //   if (list.isEmpty) {
+  //     return urlList;
+  //   } else {
+  //     for (int i = 0; i < list.length; i++) {
+  //       urlList.add(list[i]['url'] as String);
+  //     }
+  //     return urlList;
+  //   }
+  // }
 
   // Future<List<Map<String, Object?>>> querySynchro() async {
   //   List<Map<String, Object?>> list =
@@ -143,7 +155,7 @@ class SqlStore extends GetxController {
   //根据url 获取movieId
   Future<String> queryMovieId(String url) async {
     List<Map<String, Object?>> list =
-        await db.query('a_download', where: 'url = ?', whereArgs: [url]);
+        await db!.query('a_download', where: 'url = ?', whereArgs: [url]);
     if (list.isEmpty) {
       return '';
     } else {
@@ -153,7 +165,7 @@ class SqlStore extends GetxController {
 
   //根据movieId 获取LocalPath 和title
   Future<String> queryLocalPath(String movieId) async {
-    List<Map<String, Object?>> list = await db
+    List<Map<String, Object?>> list = await db!
         .query('a_download', where: 'movieId = ?', whereArgs: [movieId]);
     if (list.isEmpty) {
       return '';
@@ -164,13 +176,13 @@ class SqlStore extends GetxController {
 
   //根据movieId 更新数据的synchro状态
   Future<void> updateSynchro(String movieId, int synchro) async {
-    await db.update('a_download', {'synchro': synchro},
+    await db!.update('a_download', {'synchro': synchro},
         where: 'movieId = ?', whereArgs: [movieId]);
   }
 
   // 根据movieId查询数据库中是否有该电影 返回bool
   Future<bool> queryDownload(String movieId) async {
-    List<Map<String, Object?>> list = await db
+    List<Map<String, Object?>> list = await db!
         .query('a_download', where: 'movieId = ?', whereArgs: [movieId]);
     if (list.isEmpty) {
       return false;
@@ -181,53 +193,61 @@ class SqlStore extends GetxController {
 
   //查询status不为succeeded的电影 不需要localPath synchro字段
   Future<List<Map<String, Object?>>> queryAllDownloadNotSucceeded() async {
-    List<Map<String, Object?>> list = await db
+    List<Map<String, Object?>> list = await db!
         .query('a_download', where: 'status != ?', whereArgs: ['succeeded']);
     return list;
   }
 
-  //查询所有所有数据
-  Future<List<Map<String, Object?>>> queryAllDownload() async {
-    List<Map<String, Object?>> list = await db.query('a_download');
-    return list;
+  //查询状态为succeeded的电影的数量
+  Future<int> querySucceeded() async {
+    List<Map<String, Object?>> list =
+        await db!.query('a_download', where: 'status = ?', whereArgs: ['succeeded']);
+    return list.length;
   }
+
+  //查询所有所有数据
+  // Future<List<Map<String, Object?>>> queryAllDownload() async {
+  //   List<Map<String, Object?>> list = await db.query('a_download');
+  //   return list;
+  // }
 
   //查询6个数据 如果不满6个，则返回6个一样的数据
   Future<List<Map<String, Object?>>> querySixDownload() async {
-    List<Map<String, Object?>> list = await db.rawQuery(
+    List<Map<String, Object?>> list = await db!.rawQuery(
         "SELECT * FROM a_download WHERE status = 'succeeded' ORDER BY RANDOM() LIMIT 6");
+
     return list;
   }
 
   //随机获取 一条数据 返回Cover
-  Future<String?> queryCoverOne() async {
-    List<Map<String, Object?>> list = await db.query('a_download',
-        columns: ['cover'],
-        where: 'status = ?',
-        whereArgs: ['succeeded'],
-        limit: 1,
-        orderBy: 'RANDOM()');
-    if (list.isEmpty) {
-      return null;
-    } else {
-      return list[0]['cover'] as String;
-    }
-  }
+  // Future<String?> queryCoverOne() async {
+  //   List<Map<String, Object?>> list = await db.query('a_download',
+  //       columns: ['cover'],
+  //       where: 'status = ?',
+  //       whereArgs: ['succeeded'],
+  //       limit: 1,
+  //       orderBy: 'RANDOM()');
+  //   if (list.isEmpty) {
+  //     return null;
+  //   } else {
+  //     return list[0]['cover'] as String;
+  //   }
+  // }
 
 //随机查询出一个数据，使用String a = ;String b = title;
-  Future<List<String>> queryUrlTitle() async {
-    List<Map<String, Object?>> list = await db.rawQuery(
-        "SELECT localPath, title FROM a_download WHERE status = 'succeeded' ORDER BY RANDOM() LIMIT 1");
-
-    List<String> urlTitleList = [];
-    if (list.isEmpty) {
-      return urlTitleList;
-    } else {
-      urlTitleList.add(list[0]['localPath'] as String);
-      urlTitleList.add(list[0]['title'] as String);
-      return urlTitleList;
-    }
-  }
+//   Future<List<String>> queryUrlTitle() async {
+//     List<Map<String, Object?>> list = await db.rawQuery(
+//         "SELECT localPath, title FROM a_download WHERE status = 'succeeded' ORDER BY RANDOM() LIMIT 1");
+//
+//     List<String> urlTitleList = [];
+//     if (list.isEmpty) {
+//       return urlTitleList;
+//     } else {
+//       urlTitleList.add(list[0]['localPath'] as String);
+//       urlTitleList.add(list[0]['title'] as String);
+//       return urlTitleList;
+//     }
+//   }
 
 //------------------------------------------------------
 
@@ -236,7 +256,7 @@ class SqlStore extends GetxController {
   Future<void> insertOrders(String id, String videoId, String title,
       String nickname, String truename, String createTime,
       {int isplay = 0}) async {
-    int isSuccess = await db.insert('a_orders', {
+    int isSuccess = await db!.insert('a_orders', {
       'id': id,
       'videoId': videoId,
       'title': title,
@@ -250,14 +270,14 @@ class SqlStore extends GetxController {
 
   //根据videoId 修改 isplay状态
   Future<void> updateOrders(String id, int isplay) async {
-    await db.update('a_orders', {'isplay': isplay},
+    await db!.update('a_orders', {'isplay': isplay},
         where: 'id = ?', whereArgs: [id]);
   }
 
   //判断是否有存在isplay = 1的数据
   Future<bool> queryIsPlay() async {
     List<Map<String, Object?>> list =
-        await db.query('a_orders', where: 'isplay = ?', whereArgs: [1]);
+        await db!.query('a_orders', where: 'isplay = ?', whereArgs: [1]);
     if (list.isEmpty) {
       return false;
     } else {
@@ -267,12 +287,12 @@ class SqlStore extends GetxController {
 
   //根据videoId 删除数据
   Future<void> deleteOrders(String Id) async {
-    await db.delete('a_orders', where: 'id = ?', whereArgs: [Id]);
+    await db!.delete('a_orders', where: 'id = ?', whereArgs: [Id]);
   }
 
   //查询所有数据并且根据createTime排序
   Future<List<Map<String, Object?>>> queryAllOrders() async {
-    List<Map<String, dynamic>> list = await db.rawQuery(
+    List<Map<String, dynamic>> list = await db!.rawQuery(
         'SELECT * FROM a_orders ORDER BY CAST(createTime AS INTEGER) ASC');
     return list;
   }

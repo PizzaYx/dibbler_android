@@ -1,16 +1,14 @@
+import 'package:dibbler_android/tools/downLoadStore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
-
-import 'downLoadStore.dart';
-import 'homeController.dart';
-import 'homePage.dart';
-import 'sqlStore.dart';
-import 'video_view.dart';
-import 'webSocket.dart';
+import 'home/homePage.dart';
+import 'tools/sqlStore.dart';
+import 'video/videoController.dart';
+import 'tools/webSocket.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

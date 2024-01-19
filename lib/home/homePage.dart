@@ -1,13 +1,14 @@
 //首页
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:dibbler_android/scrollingText.dart';
+
+import 'package:dibbler_android/view/scrollingText.dart';
+import 'package:dibbler_android/video/videoPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'homeController.dart';
-import 'mycustomclipper.dart';
-import 'video_view.dart';
+import '../view/mycustomclipper.dart';
+import '../video/videoController.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,8 +36,18 @@ class _HomePageState extends State<HomePage> {
   Widget sixImageWidget(int index) {
     return ClipPath(
         clipper: MyCustomClipper(),
-        child: ct.sixVideoList.isEmpty
-            ? Container(
+        child: ct.sixVideoList.length == 6
+            ? SizedBox(
+                width: smallVideoWidth +
+                    (ct.randomIndex.value == 0 ? 0 : addScope),
+                height: smallVideoHeight +
+                    (ct.randomIndex.value == 0 ? 0 : addScope),
+                child: Image.network(
+                  ct.sixVideoList[index].cover,
+                  fit: BoxFit.cover,
+                ),
+              )
+            : Container(
                 width: smallVideoWidth,
                 height: smallVideoHeight,
                 color: Colors.black,
@@ -47,16 +58,6 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.white,
                   ),
                 )),
-              )
-            : SizedBox(
-                width: smallVideoWidth +
-                    (ct.randomIndex.value == 0 ? 0 : addScope),
-                height: smallVideoHeight +
-                    (ct.randomIndex.value == 0 ? 0 : addScope),
-                child: Image.network(
-                  ct.sixVideoList[index].cover,
-                  fit: BoxFit.cover,
-                ),
               ));
   }
 
@@ -117,14 +118,28 @@ class _HomePageState extends State<HomePage> {
               )),
 
           //视频
-          Positioned(
-            left: 366.5.w,
-            right: 366.5.w,
-            top: 524.5.h,
-            bottom: 559.5.h,
-            child: ClipPath(
-                clipper: MyCustomClipper(isRadius: false),
-                child: VideoPlayerWidget()),
+          Obx(
+            () => Positioned(
+              left: 366.5.w,
+              right: 366.5.w,
+              top: 524.5.h,
+              bottom: 559.5.h,
+              child: ClipPath(
+                  clipper: MyCustomClipper(isRadius: false),
+                  child: ct.sixVideoList.length != 6
+                      ? Container(
+                          color: Colors.black,
+                          child: const Center(
+                            child: Text(
+                              '加载中',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        )
+                      : const VideoPlayerWidget()),
+            ),
           ),
 
           //图片组 0
@@ -182,19 +197,18 @@ class _HomePageState extends State<HomePage> {
               right: 415.w,
               top: 992.h,
               child: SizedBox(
-                child: Text(
-                  ct.sixVideoList.isEmpty
-                      ? ""
-                      : ct.sixVideoList[ct.randomIndex.value].introduction,
-                  style: TextStyle(
-                    color: const Color.fromRGBO(101, 194, 255, 1),
-                    fontSize: 25.sp,
-                    fontWeight: FontWeight.bold,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  maxLines: 3,
+                  child: Text(
+                ct.sixVideoList.length == 6
+                    ? ct.sixVideoList[ct.randomIndex.value].introduction
+                    : "",
+                style: TextStyle(
+                  color: const Color.fromRGBO(101, 194, 255, 1),
+                  fontSize: 25.sp,
+                  fontWeight: FontWeight.bold,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
+                maxLines: 3,
+              )),
             ),
           ),
 
