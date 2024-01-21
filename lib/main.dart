@@ -1,4 +1,5 @@
 import 'package:dibbler_android/tools/downLoadStore.dart';
+import 'package:dibbler_android/video/VideoNewController.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // import 'package:flutter_downloader/flutter_downloader.dart';
@@ -27,8 +28,8 @@ class MyApp extends StatelessWidget {
     Get.put<SqlStore>(SqlStore());
     //下载
     Get.put<DownLoadStore>(DownLoadStore());
-    //视频
-    Get.put<VideoController>(VideoController());
+    // //视频
+    // Get.put<VideoController>(VideoController());
     //websocket
     Get.put<WebSocketController>(WebSocketController());
 

@@ -1,11 +1,13 @@
 //首页
 
+import 'package:dibbler_android/video/videoNewPage.dart';
 import 'package:dibbler_android/view/scrollingText.dart';
 import 'package:dibbler_android/video/videoPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../video/VideoNewController.dart';
 import 'homeController.dart';
 import '../view/mycustomclipper.dart';
 import '../video/videoController.dart';
@@ -19,13 +21,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final HomeController ct = Get.put(HomeController());
-  final VideoController vct = Get.find<VideoController>();
+
+  // final VideoController vct = Get.find<VideoController>();
   final ScrollingTextController sc = Get.put(ScrollingTextController());
   double smallVideoWidth = 194.w;
   double smallVideoHeight = 109.h;
 
   //增加范围
-  double addScope = 10.w;
+  double addScope = 20.w;
 
   @override
   void initState() {
@@ -39,13 +42,24 @@ class _HomePageState extends State<HomePage> {
         child: ct.sixVideoList.length == 6
             ? SizedBox(
                 width: smallVideoWidth +
-                    (ct.randomIndex.value == 0 ? 0 : addScope),
+                    (ct.randomIndex.value == index ? addScope : 0),
                 height: smallVideoHeight +
-                    (ct.randomIndex.value == 0 ? 0 : addScope),
-                child: Image.network(
-                  ct.sixVideoList[index].cover,
-                  fit: BoxFit.cover,
-                ),
+                    (ct.randomIndex.value == index ? addScope : 0),
+                child: ct.randomIndex.value == index
+                    ? Image.network(
+                        ct.sixVideoList[index].cover,
+                        fit: BoxFit.cover,
+                      )
+                    : ColorFiltered(
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withOpacity(0.5), // 指定颜色和透明度
+                          BlendMode.srcOver, // 选择混合模式，可以根据需要调整
+                        ),
+                        child: Image.network(
+                          ct.sixVideoList[index].cover,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
               )
             : Container(
                 width: smallVideoWidth,
@@ -126,8 +140,9 @@ class _HomePageState extends State<HomePage> {
               bottom: 559.5.h,
               child: ClipPath(
                   clipper: MyCustomClipper(isRadius: false),
-                  child: ct.sixVideoList.length != 6
-                      ? Container(
+                  child: ct.sixVideoList.length == 6
+                      ? const VideoPage()
+                      : Container(
                           color: Colors.black,
                           child: const Center(
                             child: Text(
@@ -137,56 +152,55 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           ),
-                        )
-                      : const VideoPlayerWidget()),
+                        )),
             ),
           ),
 
           //图片组 0
           Obx(() {
             return Positioned(
-                left: 150.w - (ct.randomIndex.value == 0 ? 0 : addScope),
-                top: 556.5.h - (ct.randomIndex.value == 0 ? 0 : addScope),
+                left: 150.w - (ct.randomIndex.value == 0 ? addScope : 0),
+                top: 556.5.h - (ct.randomIndex.value == 0 ? addScope : 0),
                 child: sixImageWidget(0));
           }),
 
           //1
           Obx(
             () => Positioned(
-                left: 120.w - (ct.randomIndex.value == 0 ? 0 : addScope),
-                top: 711.h - (ct.randomIndex.value == 0 ? 0 : addScope),
+                left: 120.w - (ct.randomIndex.value == 1 ? addScope : 0),
+                top: 711.h - (ct.randomIndex.value == 1 ? addScope : 0),
                 child: sixImageWidget(1)),
           ),
 
           //2
           Obx(
             () => Positioned(
-                left: 150.w - (ct.randomIndex.value == 0 ? 0 : addScope),
-                top: 865.5.h - (ct.randomIndex.value == 0 ? 0 : addScope),
+                left: 150.w - (ct.randomIndex.value == 2 ? addScope : 0),
+                top: 865.5.h - (ct.randomIndex.value == 2 ? addScope : 0),
                 child: sixImageWidget(2)),
           ),
 
           //3
           Obx(
             () => Positioned(
-                right: 150.w - (ct.randomIndex.value == 0 ? 0 : addScope),
-                top: 556.5.h - (ct.randomIndex.value == 0 ? 0 : addScope),
+                right: 150.w - (ct.randomIndex.value == 3 ? addScope : 0),
+                top: 556.5.h - (ct.randomIndex.value == 3 ? addScope : 0),
                 child: sixImageWidget(3)),
           ),
 
           //4
           Obx(
             () => Positioned(
-                right: 120.w - (ct.randomIndex.value == 0 ? 0 : addScope),
-                top: 711.h - (ct.randomIndex.value == 0 ? 0 : addScope),
+                right: 120.w - (ct.randomIndex.value == 4 ? addScope : 0),
+                top: 711.h - (ct.randomIndex.value == 4 ? addScope : 0),
                 child: sixImageWidget(4)),
           ),
 
           //5
           Obx(
             () => Positioned(
-                right: 150.w - (ct.randomIndex.value == 0 ? 0 : addScope),
-                top: 865.5.h - (ct.randomIndex.value == 0 ? 0 : addScope),
+                right: 150.w - (ct.randomIndex.value == 5 ? addScope : 0),
+                top: 865.5.h - (ct.randomIndex.value == 5 ? addScope : 0),
                 child: sixImageWidget(5)),
           ),
 

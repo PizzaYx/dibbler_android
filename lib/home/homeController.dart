@@ -7,13 +7,14 @@ import '../Interface.dart';
 import '../entities.dart';
 import '../tools/downLoadStore.dart';
 import '../tools/webSocket.dart';
+import '../video/VideoNewController.dart';
 import '../video/videoController.dart';
 
 class HomeController extends GetxController {
   //设备唯一标识
   var deviceId = ''.obs;
   //视频播放管理器
-  final VideoController vct = Get.find<VideoController>();
+  // final VideoController vct = Get.find<VideoController>();
   //websocket管理器
   final WebSocketController webSocket = Get.find<WebSocketController>();
   //页面显示6组数据
@@ -44,7 +45,7 @@ class HomeController extends GetxController {
       getDownloadVideoList();
       querySixDownload();
       // getAllCoverTitle();
-      vct.getVideoList();
+     // vct.getVideoList();
     });
 
     //每隔10分钟获取一次视频列表 并且马上开始执行1次
@@ -80,7 +81,7 @@ class HomeController extends GetxController {
   // }
 
   //获取数据库随机6个cover title Introduction
-  void querySixDownload() async {
+  Future<void> querySixDownload() async {
     //获取所有电影列表
     List<Map<String, Object?>> resultSet = await SqlStore.to.querySixDownload();
     if (resultSet.isNotEmpty) {
@@ -204,7 +205,7 @@ class HomeController extends GetxController {
       );
     }
     //播放的视频
-    vct.getVideoList();
+   // vct.getVideoList();
   }
 
 //移除本地数据库订单列表的数据

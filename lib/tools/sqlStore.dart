@@ -17,40 +17,49 @@ class SqlStore extends GetxController {
 
   @override
   void onInit() {
-    //openDatabaseConnection();
     super.onInit();
   }
 
   @override
-  void onClose() async{
+  void onClose() async {
     await db!.close();
+  }
+
+  Future<void> deleteFile() async {
+    File file = File('/storage/emulated/0/Movies/dib/sql/a_download.db');
+
+    try {
+      bool exists = await file.exists();
+      if (exists) {
+        await file.delete();
+        print('文件删除成功');
+        await openDatabaseConnection();
+      } else {
+        print('文件不存在');
+      }
+    } catch (e) {
+      print('删除文件时发生错误：$e');
+    }
   }
 
   /// 打开数据库
   Future<void> openDatabaseConnection() async {
     String dibblerPath = await getLocalSQLlPath();
 
+
     String databaseName = 'a_download.db';
-    String path = join('$dibblerPath/sql', databaseName);
+    String path = join('${dibblerPath}sql', databaseName);
 
-    //删除1.txt文件
-   // File('$dibblerPath/1.txt').deleteSync();
-
-    // Directory('$dibblerPath/1.txt').deleteSync(recursive: false);
     // 检查数据库文件是否存在
     bool databaseExists = await File(path).exists();
 
     // 如果数据库文件存在，直接打开
     if (databaseExists) {
-      try{
+      try {
         db = await openDatabase(path);
-      }catch(e){
-       // //强行删除文件夹
-       //  Directory('$dibblerPath/sql/').deleteSync(recursive: true);
-       //  //重新创建sql文件夹
-       //  createFolder('$dibblerPath/sql/');
-       //  //重新打开数据库
-       //  openDatabaseConnection();
+      } catch (e) {
+        deleteFile();
+        return;
       }
     } else {
       // 如果数据库不存在，创建数据库
@@ -200,8 +209,8 @@ class SqlStore extends GetxController {
 
   //查询状态为succeeded的电影的数量
   Future<int> querySucceeded() async {
-    List<Map<String, Object?>> list =
-        await db!.query('a_download', where: 'status = ?', whereArgs: ['succeeded']);
+    List<Map<String, Object?>> list = await db!
+        .query('a_download', where: 'status = ?', whereArgs: ['succeeded']);
     return list.length;
   }
 

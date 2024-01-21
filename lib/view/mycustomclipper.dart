@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+
+
 class MyCustomClipper extends CustomClipper<Path> {
   late double radius;
 
@@ -13,6 +18,26 @@ class MyCustomClipper extends CustomClipper<Path> {
     }
   }
 
+  Path getPathWithBorder(Size size) {
+    final path = getClip(size);
+
+    // 创建一个边框
+    final borderPath = Path();
+
+    // 可以根据需要调整边框的宽度
+    double borderWidth = 5.0;
+
+    // 获得边框的路径，相当于将原路径放大 borderWidth 像素
+    borderPath.addPath(
+      path,
+      Offset(borderWidth, borderWidth),
+    );
+
+    // 合并原路径和边框路径
+    path.addPath(borderPath, Offset.zero);
+
+    return path;
+  }
 
 
   @override
@@ -61,4 +86,26 @@ class MyCustomClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => true;
+}
+
+
+class MyCustomPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 在这里获取带有边框的路径并绘制
+    Path pathWithBorder = MyCustomClipper().getPathWithBorder(size);
+
+    // 使用带有边框的路径进行绘制
+    Paint paint = Paint()
+      ..color = Colors.red
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawPath(pathWithBorder, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
 }

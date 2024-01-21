@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'entities.dart';
 import 'home/homeController.dart';
+import 'package:path_provider/path_provider.dart';
 
 //域名头
 String baseUrl = "http://192.168.0.148:8090/clientport/";
@@ -25,7 +26,9 @@ Future<String> getLocalSQLlPath() async {
     return sqlPath;
   } else {
     String path = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_DOWNLOADS);
+        ExternalPath.DIRECTORY_MOVIES);
+    // Directory? directory = await getExternalStorageDirectory();
+    // String path = directory!.path;
     // Obtain shared preferences.
     //下载视频存放
     createFolder('$path/dib/');

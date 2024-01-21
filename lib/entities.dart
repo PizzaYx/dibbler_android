@@ -4,7 +4,8 @@ import 'package:dibbler_android/Interface.dart';
 
 class MovieData {
   //downLoadStatus localPath 默认值为’‘
-  MovieData(this.movieId, this.url, this.cover, this.title,this.intro, this.synchro,
+  MovieData(
+      this.movieId, this.url, this.cover, this.title, this.intro, this.synchro,
       {this.downLoadStatus = 'unKnown', this.localPath = ''});
 
   String movieId;
@@ -75,5 +76,5 @@ class CoverTitle {
   String title;
   String introduction;
   String localPath;
-  CoverTitle(this.cover, this.title,this.introduction,this.localPath); //构造函数
+  CoverTitle(this.cover, this.title, this.introduction, this.localPath); //构造函数
 }
