@@ -51,17 +51,23 @@ class HomeController extends GetxController {
 
     //延迟是sql 打开或创建较慢
     //延迟20S执行一次getDownloadVideoList()方法后每隔10分钟执行一次
-    Future.delayed(const Duration(seconds: 10), () async {
-
+    Future.delayed(const Duration(seconds: 8), () async {
       getDownloadVideoList();
       //获取随机播放的视频
-      querySixDownload();
+      querySixDownload().then((value) {
+        VideoController videoController = VideoController.instance;
+        videoController.setAutoPlayUrlTitle();
+        videoController.initializeVideoPlayerController(VideoController.instance.videoUrl);
+      });
 
-      getVideoPlayList();
+      //延迟2秒拉订单
+      Future.delayed(const Duration(seconds: 2), () async {
+        getVideoPlayList();
+      });
 
-      //获取服务器订单视频列表
-      getVideoPlayList();
     });
+
+
 
     //每隔10分钟获取一次视频列表 并且马上开始执行1次
     Timer.periodic(const Duration(minutes: 10), (timer) async {
@@ -103,6 +109,7 @@ class HomeController extends GetxController {
           sixVideoList.add(sixVideoList[i]);
         }
       }
+
     } else {
       print('数据库中没有电影');
     }
@@ -183,18 +190,7 @@ class HomeController extends GetxController {
 
 //--------------点播视频-----------------
 
-  //有订单数据时 处理逻辑
-  void payVideoLogic() {
-    VideoController vct = Get.find<VideoController>();
-    //如果视频当前在播放就停止
-    if (payVideo.isNotEmpty) {
-      vct.stopAutoPlay();
-    }
-    else
-      {
-        isAutoPlay.value = true;
-      }
-  }
+
 
   // //点播播放视频列表
   //获取本地sql 订单表的1条数据

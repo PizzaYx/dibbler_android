@@ -6,14 +6,24 @@ import '../tools/Interface.dart';
 import 'VideoNewController.dart';
 
 class VideoPage extends StatefulWidget {
-  const VideoPage({super.key});
+  final bool isInit;
+  const VideoPage( {super.key, this.isInit =false});
 
   @override
   _VideoPageState createState() => _VideoPageState();
 }
 
 class _VideoPageState extends State<VideoPage> {
-  final VideoController videoController = Get.put(VideoController());
+  final VideoController videoController = VideoController.instance;
+
+  @override
+  void initState() {
+    //获取订单
+
+    super.initState();
+
+
+  }
 
   @override
   Widget build(BuildContext context) {

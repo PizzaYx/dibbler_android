@@ -84,24 +84,20 @@ class _HomePageState extends State<HomePage> {
           //背景
           Positioned.fill(child: Image.asset('assets/images/bg.png')),
           ////标题
-          Obx(
-            () => Positioned(
-                top: 369.5.h,
-                left: 0.w,
-                right: 0.w,
-                child: ct.isAutoPlay.value == true
-                    ? Center(
-                        child: Text(
-                          '本节目由 “微信名称微信名称”点播',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 50.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      )
-                    : Container()),
-          ),
+          Positioned(
+              top: 369.5.h,
+              left: 0.w,
+              right: 0.w,
+              child: Center(
+                child: Text(
+                  '本节目由 “微信名称微信名称”点播',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 50.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )),
 
           //视频
           Obx(() => Positioned(
@@ -218,21 +214,19 @@ class _HomePageState extends State<HomePage> {
                 left: 415.w,
                 right: 415.w,
                 top: 992.h,
-                child: ct.isAutoPlay.value == true
-                    ? SizedBox(
-                        child: Text(
-                        ct.sixVideoList.length == 6
-                            ? ct.sixVideoList[ct.randomIndex.value].introduction
-                            : "",
-                        style: TextStyle(
-                          color: const Color.fromRGBO(101, 194, 255, 1),
-                          fontSize: 25.sp,
-                          fontWeight: FontWeight.bold,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        maxLines: 3,
-                      ))
-                    : Container()),
+                child: SizedBox(
+                    child: Text(
+                  ct.sixVideoList.length == 6
+                      ? ct.sixVideoList[ct.randomIndex.value].introduction
+                      : "",
+                  style: TextStyle(
+                    color: const Color.fromRGBO(101, 194, 255, 1),
+                    fontSize: 25.sp,
+                    fontWeight: FontWeight.bold,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  maxLines: 3,
+                ))),
           ),
 
           //下方扫码

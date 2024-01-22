@@ -12,6 +12,8 @@ import '../entities.dart';
 import '../home/homeController.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../video/VideoNewController.dart';
+
 //域名头
 String baseUrl = "http://192.168.0.148:8090/clientport/";
 final HomeController ct = Get.find<HomeController>();
@@ -125,20 +127,21 @@ Future<void> getVideoPlayList() async {
   "code": 200,
   "msg": "操作成功",
   "data": [
-    {
-      "id": "0dbd88f8ad0e4d82a95d60310bf70936",
-      "orderId": "ZB23120887e13fe94fb22222",
-      "delFlag": null,
-      "createTime": 1703127338000,
-      "videoId": "b1f385ee4fae4374a2e0554cafc3301b",
-      "title": "光进来的地方——女性文学修养和创作",
-      "nickname": "张三",
-      "truename": "张三"
-    }
+   
   ]
 }
 ''';
 
+//   {
+//     "id": "0dbd88f8ad0e4d82a95d60310bf70936",
+//   "orderId": "ZB23120887e13fe94fb22222",
+//   "delFlag": null,
+//   "createTime": 1703127338000,
+//   "videoId": "b1f385ee4fae4374a2e0554cafc3301b",
+//   "title": "光进来的地方——女性文学修养和创作",
+//   "nickname": "张三",
+//   "truename": "张三"
+// }
   // 解析模拟响应数据
   Map<String, dynamic> mockData = json.decode(mockResponse);
 
@@ -153,6 +156,11 @@ Future<void> getVideoPlayList() async {
   } else {
     ct.payVideo.value = [];
   }
+  if(ct.payVideo.isNotEmpty){
+    VideoController.instance.payVideoLogic();
+  }
+
+
 }
 
 // try {

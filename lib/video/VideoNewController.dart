@@ -10,8 +10,17 @@ import '../tools/Interface.dart';
 class VideoController extends GetxController {
   VideoPlayerController? videoPlayerController;
 
+  // 私有构造函数
+  VideoController._();
+
+  // 单例实例
+  static final VideoController _instance = VideoController._();
+
+  // 静态方法来获取实例
+  static VideoController get instance => _instance;
+
   // 倒计时
-  late Timer countdownTimer;
+  Timer? countdownTimer;
 
   // 随机观看时长
   int randomTime = 15;
@@ -31,9 +40,6 @@ class VideoController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    setAutoPlayUrlTitle();
-    // 初始化视频控制器
-    initializeVideoPlayerController(videoUrl);
   }
 
   // 设置随机播放的视频
@@ -68,13 +74,25 @@ class VideoController extends GetxController {
       });
   }
 
+  //有订单数据时 处理逻辑
+  void payVideoLogic() {
+    //如果视频当前在播放就停止
+    if (ct.payVideo.isNotEmpty) {
+      ct.isAutoPlay.value = false;
+      Get.to(() => const VideoFullScreen());
+      stopAutoPlay();
+    } else {
+      ct.isAutoPlay.value = true;
+    }
+  }
+
   // 视频播放结束监听
   void videoEndListener() {
     print(
         'videoPlayerController!.value.position ---- ${videoPlayerController!.value.position}');
 
-    // print(
-    //     'videoPlayerController!.value.duration ---- ${videoPlayerController!.value.duration}');
+    print(
+        'videoPlayerController!.value.duration ---- ${videoPlayerController!.value.duration}');
 
     //如果随机播放
     if (videoPlayerController!.value.position < const Duration(seconds: 16) &&
@@ -82,7 +100,6 @@ class VideoController extends GetxController {
         ct.isAutoPlay.value == true) {
       //结束和暂停视频
       videoPlayerController!.pause();
-      videoPlayerController!.seekTo(Duration.zero);
       videoPlayerController!.dispose();
       videoPlayerController = null;
       //开始倒计时
@@ -97,7 +114,6 @@ class VideoController extends GetxController {
       if (shouldStartCountdown.value) {
         //结束和暂停视频
         videoPlayerController!.pause();
-        videoPlayerController!.seekTo(Duration.zero);
         videoPlayerController!.dispose();
         videoPlayerController = null;
         //删除订单视频
@@ -118,7 +134,7 @@ class VideoController extends GetxController {
       if (countdownDuration.value == 0) {
         // 倒计时结束，切换到新的视频地址
         shouldStartCountdown.value = false;
-        countdownTimer.cancel();
+        countdownTimer!.cancel();
         if (ct.isAutoPlay.value) {
           onAutoComplete();
         } else {
@@ -130,13 +146,16 @@ class VideoController extends GetxController {
 
   //如果在随机播放中 获取到订单视频 就停止播放开始倒计时
   void stopAutoPlay() {
-    //并且定时器没有在倒计时
-    if (ct.isAutoPlay.value == true && countdownTimer.isActive != true) {
+    //并且定时器没有被创建
+    if (shouldStartCountdown.value == false || countdownTimer == null ) {
       //结束和暂停视频
-      videoPlayerController!.pause();
-      videoPlayerController!.seekTo(Duration.zero);
-      videoPlayerController!.dispose();
-      videoPlayerController = null;
+      if(videoPlayerController!=null)
+        {
+          videoPlayerController!.pause();
+          videoPlayerController!.seekTo(Duration.zero);
+          videoPlayerController!.dispose();
+          videoPlayerController = null;
+        }
       //开始倒计时
       startCountdown();
     }
@@ -153,6 +172,7 @@ class VideoController extends GetxController {
       videoUrl = await SqlStore.to.queryLocalPath(ct.payVideo[0].videoId);
       videoTitle = ct.payVideo[0].title;
     }
+
     //开始跑马灯
     ct.getVideoHorseList();
     initializeVideoPlayerController(videoUrl);
@@ -179,7 +199,7 @@ class VideoController extends GetxController {
   void dispose() {
     // 在控制器销毁时，释放 VideoPlayerController 和计时器
     videoPlayerController!.dispose();
-    countdownTimer.cancel();
+    countdownTimer!.cancel();
     super.dispose();
   }
 }
