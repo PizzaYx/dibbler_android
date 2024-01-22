@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 class ScrollingTextController extends GetxController {
@@ -87,7 +88,7 @@ class _ScrollingTextState extends State<ScrollingText>
         final double textWidth = textPainter.size.width;
 
         return Positioned(
-          bottom: 0,
+          bottom: 270.h,
           right:_controller.value * (MediaQuery.of(context).size.width + textWidth) - textWidth, // 使用 Positioned 来控制文本的位置
           child: child!,
         );

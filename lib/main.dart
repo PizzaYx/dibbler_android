@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
     Get.put<SqlStore>(SqlStore());
     //下载
     Get.put<DownLoadStore>(DownLoadStore());
-    // //视频
+    //视频
     // Get.put<VideoController>(VideoController());
     //websocket
     Get.put<WebSocketController>(WebSocketController());

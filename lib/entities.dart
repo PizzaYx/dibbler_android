@@ -1,6 +1,6 @@
 //movieId 电影ID,url电影链接,cover电影封面,title电影标题,status 本地下载状态,
 // localPath 本地下载路径,synchro与服务器同步下载状态 fromJson方法 tojson方法
-import 'package:dibbler_android/Interface.dart';
+import 'package:dibbler_android/tools/Interface.dart';
 
 class MovieData {
   //downLoadStatus localPath 默认值为’‘

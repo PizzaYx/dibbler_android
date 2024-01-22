@@ -2,25 +2,35 @@ import 'dart:async';
 import 'package:dibbler_android/tools/sqlStore.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../Interface.dart';
+import '../tools/Interface.dart';
 
 import '../entities.dart';
 import '../tools/downLoadStore.dart';
 import '../tools/webSocket.dart';
 import '../video/VideoNewController.dart';
-import '../video/videoController.dart';
+import '../video/videoFullScreen.dart';
+import '../view/scrollingText.dart';
 
 class HomeController extends GetxController {
   //设备唯一标识
   var deviceId = ''.obs;
+
   //视频播放管理器
   // final VideoController vct = Get.find<VideoController>();
   //websocket管理器
   final WebSocketController webSocket = Get.find<WebSocketController>();
+
   //页面显示6组数据
   var sixVideoList = <CoverTitle>[].obs;
+
   //当前播放视频下标
   var randomIndex = 0.obs;
+
+  // 是否自动播放
+  var isAutoPlay = true.obs;
+
+  //本地数据订单视频信息
+  var payVideo = <PlayVideo>[].obs;
 
   @override
   void onInit() async {
@@ -42,10 +52,15 @@ class HomeController extends GetxController {
     //延迟是sql 打开或创建较慢
     //延迟20S执行一次getDownloadVideoList()方法后每隔10分钟执行一次
     Future.delayed(const Duration(seconds: 10), () async {
+
       getDownloadVideoList();
+      //获取随机播放的视频
       querySixDownload();
-      // getAllCoverTitle();
-     // vct.getVideoList();
+
+      getVideoPlayList();
+
+      //获取服务器订单视频列表
+      getVideoPlayList();
     });
 
     //每隔10分钟获取一次视频列表 并且马上开始执行1次
@@ -64,22 +79,6 @@ class HomeController extends GetxController {
     super.onInit();
   }
 
-  //获取数据库所有的cover和title
-  // void getAllCoverTitle() async {
-  //   //获取所有电影列表
-  //   List<Map<String, Object?>> resultSet = await SqlStore.to.queryAllDownload();
-  //   if (resultSet.isNotEmpty) {
-  //     //只获取 Cover 和title
-  //     for (var item in resultSet) {
-  //       CoverTitle coverTitle =
-  //           CoverTitle(item["cover"].toString(), item["title"].toString(), '');
-  //       allVideoList.add(coverTitle);
-  //     }
-  //   } else {
-  //     print('数据库中没有电影');
-  //   }
-  // }
-
   //获取数据库随机6个cover title Introduction
   Future<void> querySixDownload() async {
     //获取所有电影列表
@@ -88,8 +87,11 @@ class HomeController extends GetxController {
       sixVideoList.clear();
 
       for (var item in resultSet) {
-        CoverTitle coverTitle = CoverTitle(item["cover"].toString(),
-            item["title"].toString(), item["intro"].toString(), item["localPath"].toString());
+        CoverTitle coverTitle = CoverTitle(
+            item["cover"].toString(),
+            item["title"].toString(),
+            item["intro"].toString(),
+            item["localPath"].toString());
         sixVideoList.add(coverTitle);
       }
 
@@ -101,16 +103,10 @@ class HomeController extends GetxController {
           sixVideoList.add(sixVideoList[i]);
         }
       }
-
     } else {
       print('数据库中没有电影');
     }
   }
-
-  // @override
-  // void onClose() {
-  //   super.onClose();
-  // }
 
   // 先存储在sql中
   Future<void> handlingLinks(List<MovieData> movies) async {
@@ -185,35 +181,90 @@ class HomeController extends GetxController {
     });
   }
 
-//--------------视频-----------------
-//下载成功一次就随机获取一次数据库视频
-//   void getRandomDownloadMovie() {
-//     vct.setAutoPlayUrlTitle();
-//   }
+//--------------点播视频-----------------
 
-  //设置指定播放视频订单列表
-  void setPlayList(List<PlayVideo> data) {
-    //先存入数据库
-    for (int i = 0; i < data.length; i++) {
-      SqlStore.to.insertOrders(
-        data[i].id,
-        data[i].videoId,
-        data[i].title,
-        data[i].nickname,
-        data[i].truename,
-        data[i].createTime,
-      );
+  //有订单数据时 处理逻辑
+  void payVideoLogic() {
+    VideoController vct = Get.find<VideoController>();
+    //如果视频当前在播放就停止
+    if (payVideo.isNotEmpty) {
+      vct.stopAutoPlay();
     }
-    //播放的视频
-   // vct.getVideoList();
+    else
+      {
+        isAutoPlay.value = true;
+      }
+  }
+
+  // //点播播放视频列表
+  //获取本地sql 订单表的1条数据
+  // Future<void> getPayVideoForOne() async {
+  //   List<Map<String, Object?>> resultSet = await SqlStore.to.queryOneIsPlay();
+  //   List<PlayVideo> data = [];
+  //   for (int i = 0; i < resultSet.length; i++) {
+  //     PlayVideo movie = PlayVideo(
+  //       resultSet[i]['videoId'] as String,
+  //       resultSet[i]['id'] as String,
+  //       resultSet[i]['title'] as String,
+  //       resultSet[i]['nickname'] as String,
+  //       resultSet[i]['truename'] as String,
+  //       resultSet[i]['createTime'] as String,
+  //       isplay: resultSet[i]['isplay'] as int,
+  //     );
+  //     data.add(movie);
+  //   }
+  //   if (data.isNotEmpty) {
+  //     isAutoPlay.value = false;
+  //     payVideo.value = data;
+  //   } else {
+  //     //--
+  //     Get.to(()=>const VideoFullScreen());
+  //     isAutoPlay.value = true;
+  //     payVideo.value = [];
+  //   }
+  // }
+
+  // //设置指定播放视频订单列表存入数据库
+  // void setPlayList(List<PlayVideo> data) {
+  //   for (int i = 0; i < data.length; i++) {
+  //     SqlStore.to.insertOrders(
+  //       data[i].id,
+  //       data[i].videoId,
+  //       data[i].title,
+  //       data[i].nickname,
+  //       data[i].truename,
+  //       data[i].createTime,
+  //     );
+  //   }
+  //   getVideoList();
+  // }
+
+  //   跑马灯数据
+  void getVideoHorseList() async {
+    String moveString = '';
+    if (payVideo.isNotEmpty) {
+      //设置跑马灯数据
+      final ScrollingTextController sc = Get.find<ScrollingTextController>();
+      for (int i = 0; i < payVideo.length; i++) {
+        if (i == 0) {
+          moveString += '当前播放: ${payVideo[i].nickname} [${payVideo[i].title}] ';
+        } else {
+          moveString +=
+              '稍后播放: $i:${payVideo[i].nickname}[${payVideo[i].title}] ';
+        }
+        if (i != payVideo.length - 1) {
+          moveString += "   ";
+        }
+      }
+      sc.changeText(moveString);
+    }
   }
 
 //移除本地数据库订单列表的数据
-// void removeOrders(String videoId) {
-//   SqlStore.to.deleteOrders(videoId);
-//   //重新获取播放列表
-//   vct.getVideoList();
-// }
+//   void removeOrders() {
+//
+//
+//   }
 
 //-----------------------------------
 }

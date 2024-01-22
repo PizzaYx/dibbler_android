@@ -1,21 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dibbler_android/tools/sqlStore.dart';
+import 'package:dibbler_android/video/videoFullScreen.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
-import '../Interface.dart';
+import '../tools/Interface.dart';
 
 class VideoController extends GetxController {
   VideoPlayerController? videoPlayerController;
 
-  // 是否自动播放
-  var isAutoPlay = true.obs;
-
   // 倒计时
   late Timer countdownTimer;
-
-  // 随机播放时长定时器
-  // Timer? timer;
 
   // 随机观看时长
   int randomTime = 15;
@@ -77,9 +73,13 @@ class VideoController extends GetxController {
     print(
         'videoPlayerController!.value.position ---- ${videoPlayerController!.value.position}');
 
+    // print(
+    //     'videoPlayerController!.value.duration ---- ${videoPlayerController!.value.duration}');
+
     //如果随机播放
-    if (videoPlayerController!.value.position >= const Duration(seconds: 15) &&
-        isAutoPlay.value == true) {
+    if (videoPlayerController!.value.position < const Duration(seconds: 16) &&
+        videoPlayerController!.value.position >= const Duration(seconds: 15) &&
+        ct.isAutoPlay.value == true) {
       //结束和暂停视频
       videoPlayerController!.pause();
       videoPlayerController!.seekTo(Duration.zero);
@@ -92,7 +92,7 @@ class VideoController extends GetxController {
     //如果正常播放
     if (videoPlayerController!.value.position ==
             videoPlayerController!.value.duration &&
-        isAutoPlay.value == false) {
+        ct.isAutoPlay.value == false) {
       // 视频播放结束，启动倒计时
       if (shouldStartCountdown.value) {
         //结束和暂停视频
@@ -100,6 +100,10 @@ class VideoController extends GetxController {
         videoPlayerController!.seekTo(Duration.zero);
         videoPlayerController!.dispose();
         videoPlayerController = null;
+        //删除订单视频
+        delVideoPlayList(ct.payVideo[0].id);
+        //获取有没有订单视频
+        ct.getVideoHorseList();
         startCountdown();
       }
     }
@@ -115,14 +119,27 @@ class VideoController extends GetxController {
         // 倒计时结束，切换到新的视频地址
         shouldStartCountdown.value = false;
         countdownTimer.cancel();
-
-        if (isAutoPlay.value) {
+        if (ct.isAutoPlay.value) {
           onAutoComplete();
         } else {
-          //稍后处理
+          onPayVideoComplete();
         }
       }
     });
+  }
+
+  //如果在随机播放中 获取到订单视频 就停止播放开始倒计时
+  void stopAutoPlay() {
+    //并且定时器没有在倒计时
+    if (ct.isAutoPlay.value == true && countdownTimer.isActive != true) {
+      //结束和暂停视频
+      videoPlayerController!.pause();
+      videoPlayerController!.seekTo(Duration.zero);
+      videoPlayerController!.dispose();
+      videoPlayerController = null;
+      //开始倒计时
+      startCountdown();
+    }
   }
 
   // 重置倒计时
@@ -130,14 +147,25 @@ class VideoController extends GetxController {
     countdownDuration.value = 10;
   }
 
+  //点播播放视频逻辑
+  Future<void> onPayVideoComplete() async {
+    if (ct.payVideo.isNotEmpty) {
+      videoUrl = await SqlStore.to.queryLocalPath(ct.payVideo[0].videoId);
+      videoTitle = ct.payVideo[0].title;
+    }
+    //开始跑马灯
+    ct.getVideoHorseList();
+    initializeVideoPlayerController(videoUrl);
+    // 重置倒计时
+    resetCountdown();
+  }
+
   //随机播放后逻辑
   void onAutoComplete() {
     // 切换到新的视频地址
     if (ct.randomIndex.value == (ct.sixVideoList.length - 1)) {
       //重新获取6个视频
-      ct.querySixDownload().then((value) => {
-        ct.randomIndex.value = 0
-      });
+      ct.querySixDownload().then((value) => {ct.randomIndex.value = 0});
     } else {
       ct.randomIndex.value++;
     }

@@ -8,7 +8,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../Interface.dart';
+import 'Interface.dart';
 
 class SqlStore extends GetxController {
   static SqlStore get to => Get.find();
@@ -73,10 +73,10 @@ class SqlStore extends GetxController {
             ' cover TEXT, title TEXT, status TEXT, localPath TEXT, intro TEXT,synchro INTEGER)',
           );
           // 创建 orders 表
-          await database.execute(
-            'CREATE TABLE a_orders (id TEXT PRIMARY KEY ,videoId TEXT, title TEXT, nickname TEXT,'
-            ' truename TEXT, isplay INTEGER,createTime TEXT)',
-          );
+          // await database.execute(
+          //   'CREATE TABLE a_orders (id TEXT PRIMARY KEY ,videoId TEXT, title TEXT, nickname TEXT,'
+          //   ' truename TEXT, isplay INTEGER,createTime TEXT)',
+          // );
         },
       );
     }
@@ -261,50 +261,53 @@ class SqlStore extends GetxController {
 //------------------------------------------------------
 
 //--------------------------订单sql----------------------
-  //给orders表插入数据 0为未播放 1为正在播放
-  Future<void> insertOrders(String id, String videoId, String title,
-      String nickname, String truename, String createTime,
-      {int isplay = 0}) async {
-    int isSuccess = await db!.insert('a_orders', {
-      'id': id,
-      'videoId': videoId,
-      'title': title,
-      'nickname': nickname,
-      'truename': truename,
-      'createTime': createTime,
-      'isplay': isplay,
-    });
-    print('insertOrders --$isSuccess');
-  }
-
-  //根据videoId 修改 isplay状态
-  Future<void> updateOrders(String id, int isplay) async {
-    await db!.update('a_orders', {'isplay': isplay},
-        where: 'id = ?', whereArgs: [id]);
-  }
-
-  //判断是否有存在isplay = 1的数据
-  Future<bool> queryIsPlay() async {
-    List<Map<String, Object?>> list =
-        await db!.query('a_orders', where: 'isplay = ?', whereArgs: [1]);
-    if (list.isEmpty) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  //根据videoId 删除数据
-  Future<void> deleteOrders(String Id) async {
-    await db!.delete('a_orders', where: 'id = ?', whereArgs: [Id]);
-  }
-
-  //查询所有数据并且根据createTime排序
-  Future<List<Map<String, Object?>>> queryAllOrders() async {
-    List<Map<String, dynamic>> list = await db!.rawQuery(
-        'SELECT * FROM a_orders ORDER BY CAST(createTime AS INTEGER) ASC');
-    return list;
-  }
+//   //给orders表插入数据 0为未播放 1为正在播放
+//   Future<void> insertOrders(String id, String videoId, String title,
+//       String nickname, String truename, String createTime,
+//       {int isplay = 0}) async {
+//     int isSuccess = await db!.rawInsert(
+//         'INSERT INTO a_orders(id,videoId,title,nickname,truename,createTime,isplay) VALUES(?,?,?,?,?,?,?)',
+//         [id, videoId, title, nickname, truename, createTime, isplay]);
+//
+//     print('insertOrders --$isSuccess');
+//   }
+//
+//   //根据videoId 修改 isplay状态
+//   Future<void> updateOrders(String id, int isplay) async {
+//     await db!.update('a_orders', {'isplay': isplay},
+//         where: 'id = ?', whereArgs: [id]);
+//   }
+//
+//   //判断是否有存在isplay = 1的数据
+//   Future<bool> queryIsPlay() async {
+//     List<Map<String, Object?>> list =
+//         await db!.query('a_orders', where: 'isplay = ?', whereArgs: [1]);
+//     if (list.isEmpty) {
+//       return false;
+//     } else {
+//       return true;
+//     }
+//   }
+//
+//   //查询一条 isplay = 0的数据
+//   Future<List<Map<String, Object?>>> queryOneIsPlay() async {
+//     List<Map<String, Object?>> list = await db!.rawQuery(
+//         'SELECT * FROM a_orders WHERE isplay = 0 ORDER BY CAST(createTime AS INTEGER) ASC LIMIT 1');
+//     return list;
+//   }
+//
+//
+//   //根据videoId 删除数据
+//   Future<void> deleteOrders(String Id) async {
+//     await db!.delete('a_orders', where: 'id = ?', whereArgs: [Id]);
+//   }
+//
+//   //查询所有数据并且根据createTime排序
+//   Future<List<Map<String, Object?>>> queryAllOrders() async {
+//     List<Map<String, dynamic>> list = await db!.rawQuery(
+//         'SELECT * FROM a_orders ORDER BY CAST(createTime AS INTEGER) ASC');
+//     return list;
+//   }
 
 //-------------------------------------------------------
 }

@@ -1,6 +1,6 @@
 //下载管理器
 import 'package:al_downloader/al_downloader.dart';
-import 'package:dibbler_android/Interface.dart';
+import 'package:dibbler_android/tools/Interface.dart';
 import 'package:dibbler_android/tools/sqlStore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';

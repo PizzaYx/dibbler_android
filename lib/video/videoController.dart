@@ -106,46 +106,7 @@
 //     randomVideoTitle = ct.sixVideoList[ct.randomIndex.value].title;
 //   }
 //
-//   // 获取 后设置缓存播放列表 和 跑马灯数据
-//   void getVideoList() async {
-//     List<Map<String, Object?>> resultSet = await SqlStore.to.queryAllOrders();
-//     List<PlayVideo> data = [];
-//     for (int i = 0; i < resultSet.length; i++) {
-//       PlayVideo movie = PlayVideo(
-//         resultSet[i]['videoId'] as String,
-//         resultSet[i]['id'] as String,
-//         resultSet[i]['title'] as String,
-//         resultSet[i]['nickname'] as String,
-//         resultSet[i]['truename'] as String,
-//         resultSet[i]['createTime'] as String,
-//         isplay: resultSet[i]['isplay'] as int,
-//       );
-//       data.add(movie);
-//     }
-//
-//     String moveString = '';
-//     if (data.isNotEmpty) {
-//       isAutoPlay.value = false;
-//       videoList = data;
-//       setVideoListStatus();
-//       //设置跑马灯数据
-//       final ScrollingTextController sc = Get.find<ScrollingTextController>();
-//       for (int i = 0; i < data.length; i++) {
-//         if (i == 0) {
-//           moveString += '当前播放: ${data[i].nickname} [${data[i].title}] ';
-//         } else {
-//           moveString += '稍后播放: ${i}:${data[i].nickname}[${data[i].title}] ';
-//         }
-//         if (i != data.length - 1) {
-//           moveString += "   ";
-//         }
-//       }
-//       sc.changeText(moveString);
-//     } else {
-//       isAutoPlay.value = true;
-//       // resetCountDown();
-//     }
-//   }
+
 //
 //   //设置订单播放视频列表的状态
 //   void setVideoListStatus() async {

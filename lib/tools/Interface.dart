@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -7,8 +8,8 @@ import 'package:external_path/external_path.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'entities.dart';
-import 'home/homeController.dart';
+import '../entities.dart';
+import '../home/homeController.dart';
 import 'package:path_provider/path_provider.dart';
 
 //域名头
@@ -115,34 +116,71 @@ Future<void> updateVideoIsDownload(String movieId) async {
   }
 }
 
-//GETgetVideoPlayList
+//GETgetVideoPlayList 获取订单播放视频列表
 Future<void> getVideoPlayList() async {
   List<PlayVideo> movies = [];
-  try {
-    String deviceId = await getDeviceId();
-
-    var response =
-        await Dio().get("${baseUrl}getVideoPlayList?clientId=$deviceId");
-
-    if (response.data['code'] == 200) {
-      List<dynamic> data = response.data['data'];
-      String moveString = '';
-      for (int i = 0; i < data.length; i++) {
-        movies.add(PlayVideo.fromJson(data[i]));
-      }
-      ct.setPlayList(movies);
+  // 模拟服务器响应数据
+  String mockResponse = '''
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": [
+    {
+      "id": "0dbd88f8ad0e4d82a95d60310bf70936",
+      "orderId": "ZB23120887e13fe94fb22222",
+      "delFlag": null,
+      "createTime": 1703127338000,
+      "videoId": "b1f385ee4fae4374a2e0554cafc3301b",
+      "title": "光进来的地方——女性文学修养和创作",
+      "nickname": "张三",
+      "truename": "张三"
     }
-  } catch (e) {
-    print(e);
+  ]
+}
+''';
+
+  // 解析模拟响应数据
+  Map<String, dynamic> mockData = json.decode(mockResponse);
+
+// 处理模拟数据
+  if (mockData['code'] == 200) {
+    List<dynamic> data = mockData['data'];
+    List<PlayVideo> movies = [];
+    for (int i = 0; i < data.length; i++) {
+      movies.add(PlayVideo.fromJson(data[i]));
+    }
+    ct.payVideo.value = movies;
+  } else {
+    ct.payVideo.value = [];
   }
 }
+
+// try {
+//   String deviceId = await getDeviceId();
+//   var response =
+//       await Dio().get("${baseUrl}getVideoPlayList?clientId=$deviceId");
+//   if (response.data['code'] == 200) {
+//     List<dynamic> data = response.data['data'];
+//     String moveString = '';
+//     for (int i = 0; i < data.length; i++) {
+//       movies.add(PlayVideo.fromJson(data[i]));
+//     }
+//     ct.payVideo.value = movies;
+//   } else {
+//     ct.payVideo.value = [];
+//   }
+//   ct.payVideoLogic();
+// } catch (e) {
+//   print('获取订单播放视频错误');
+// }
+//}
 
 //GET /clientport/delVideoPlayList 移除播放视频
 Future<void> delVideoPlayList(String id) async {
   try {
     var response = await Dio().get("${baseUrl}delVideoPlayList?id=$id");
     if (response.data['code'] == 200) {
-      print("数据库移除成功");
+      print("移除成功");
     }
   } catch (e) {
     print(e);
